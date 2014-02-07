@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 //form.js
-var formjs = React.createClass({
+var formjs = React.createClass({displayName: 'formjs',
   updateValues: function(element){
     var currentValues = this.state.values;
     currentValues[element.id] = {name: element.name, value: element.value};
@@ -29,64 +29,65 @@ var formjs = React.createClass({
     var elements = this.state.data.map(function (element) {
       id++;
       if(element.type == "textarea"){
-        return <generateTextarea 
-        label        = {element.label} 
-        name         = {element.name} 
-        placeholder  = {element.placeholder} 
-        value        = {element.value} 
-        updateValues = {updateValues} 
-        id           = {id} />;
+        return generateTextarea( 
+        {label:         element.label, 
+        name:          element.name, 
+        placeholder:   element.placeholder, 
+        value:         element.value, 
+        updateValues:  updateValues, 
+        id:            id} );
       }
       else if(element.type == "select"){
-        return <generateSelectbox 
-        name         = {element.name} 
-        options      = {element.options}
-        updateValues = {updateValues} 
-        id           = {id} />;
+        return generateSelectbox( 
+        {name:          element.name, 
+        options:       element.options,
+        updateValues:  updateValues, 
+        id:            id} );
       }
       else{
-        return <generateInputField 
-        type         = {element.type} 
-        label        = {element.label} 
-        name         = {element.name} 
-        placeholder  = {element.placeholder} 
-        value        = {element.value} 
-        updateValues = {updateValues}
-        id           = {id} />;
+        return generateInputField( 
+        {type:          element.type, 
+        label:         element.label, 
+        name:          element.name, 
+        placeholder:   element.placeholder, 
+        value:         element.value, 
+        updateValues:  updateValues,
+        id:            id} );
       }
     });
     return(
-      <form ref="form" onSubmit={this.handleSubmit}>
-        {elements}
-        <input type="submit" value={this.state.form.submitText} />
-      </form>
+      React.DOM.form( {ref:"form", onSubmit:this.handleSubmit}, 
+        elements,
+        React.DOM.input( {type:"submit", value:this.state.form.submitText} )
+      )
     );
   }
 });
 //regular input fields
 
-var generateInputField = React.createClass({
+var generateInputField = React.createClass({displayName: 'generateInputField',
   getInitialState: function() {
     return {value: this.props.value};
   },
   handleChange: function(e) {
     var name = this.props.name;
     var value = e.target.value;
+    console.log(value);
     this.props.updateValues({id: this.props.id, name: name, value: value});
     this.setState({value: value});
   },
   render: function(){
     return(
-      <div className="element textfield">
-      <label>{this.props.label}</label>
-      <input type={this.props.type} placeholder={this.props.placeholder} value={this.state.value} onChange={this.handleChange}/>
-      </div>
+      React.DOM.div( {className:"element textfield"}, 
+      React.DOM.label(null, this.props.label),
+      React.DOM.input( {type:this.props.type, placeholder:this.props.placeholder, value:this.state.value, onChange:this.handleChange})
+      )
     );
   }
 });
 //textarea
 
-var generateTextarea = React.createClass({
+var generateTextarea = React.createClass({displayName: 'generateTextarea',
   getInitialState: function() {
     return {value: this.props.value};
   },
@@ -98,15 +99,15 @@ var generateTextarea = React.createClass({
   },
   render: function(){
     return(
-      <div className="element textarea">
-      <label>{this.props.label}</label>
-      <textarea placeholder={this.props.placeholder} onChange={this.handleChange}>{this.state.value}</textarea>
-      </div>
+      React.DOM.div( {className:"element textarea"}, 
+      React.DOM.label(null, this.props.label),
+      React.DOM.textarea( {placeholder:this.props.placeholder, onChange:this.handleChange}, this.state.value)
+      )
     );
   }
 });
 //select box
-var generateSelectbox = React.createClass({
+var generateSelectbox = React.createClass({displayName: 'generateSelectbox',
   handleChange: function(e) {
     var name = this.props.name;
     var value = e.target.value;
@@ -114,19 +115,19 @@ var generateSelectbox = React.createClass({
   },
   render: function(){
     var options = this.props.options.map(function (option) {
-      return  <option value={option.value}>{option.text}</option>
+      return  React.DOM.option( {value:option.value}, option.text)
     });
     return(
-      <div className="element select">
-      <label>{this.props.label}</label>
-      <select onChange={this.handleChange}>
-      {options}
-      </select>
-      </div>
+      React.DOM.div( {className:"element select"}, 
+      React.DOM.label(null, this.props.label),
+      React.DOM.select( {onChange:this.handleChange}, 
+      options
+      )
+      )
     );
   }
 });
 React.renderComponent(
-  <formjs fields={fields} info={info} />,
+  formjs( {fields:fields, info:info} ),
   document.body
 );

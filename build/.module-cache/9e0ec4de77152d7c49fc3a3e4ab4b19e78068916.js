@@ -5,6 +5,7 @@ var formjs = React.createClass({displayName: 'formjs',
     var currentValues = this.state.values;
     currentValues[element.id] = {name: element.name, value: element.value};
     this.setState({values: currentValues});
+    console.log(currentValues);
     return false;
   },
   handleSubmit: function() {
@@ -72,6 +73,7 @@ var generateInputField = React.createClass({displayName: 'generateInputField',
   handleChange: function(e) {
     var name = this.props.name;
     var value = e.target.value;
+    console.log(value);
     this.props.updateValues({id: this.props.id, name: name, value: value});
     this.setState({value: value});
   },

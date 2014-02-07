@@ -1,10 +1,11 @@
 /** @jsx React.DOM */
 //form.js
-var formjs = React.createClass({displayName: 'formjs',
+var initialize = React.createClass({displayName: 'initialize',
   updateValues: function(element){
     var currentValues = this.state.values;
     currentValues[element.id] = {name: element.name, value: element.value};
     this.setState({values: currentValues});
+    console.log(currentValues);
     return false;
   },
   handleSubmit: function() {
@@ -20,7 +21,7 @@ var formjs = React.createClass({displayName: 'formjs',
     return false;
   },
   getInitialState: function(){
-    return{ data: this.props.fields, form: this.props.info,values: []};
+    return{ data: elements, form: form,values: []};
 
   },
   render: function() {
@@ -72,6 +73,7 @@ var generateInputField = React.createClass({displayName: 'generateInputField',
   handleChange: function(e) {
     var name = this.props.name;
     var value = e.target.value;
+    console.log(value);
     this.props.updateValues({id: this.props.id, name: name, value: value});
     this.setState({value: value});
   },
@@ -126,7 +128,8 @@ var generateSelectbox = React.createClass({displayName: 'generateSelectbox',
     );
   }
 });
+
 React.renderComponent(
-  formjs( {fields:fields, info:info} ),
+  initialize(null ),
   document.body
-);
+  );

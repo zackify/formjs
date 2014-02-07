@@ -1,5 +1,9 @@
 /** @jsx React.DOM */
 //form.js
+React.renderComponent(
+  formjs( {fields:fields, info:info} ),
+  document.body
+);
 var formjs = React.createClass({displayName: 'formjs',
   updateValues: function(element){
     var currentValues = this.state.values;
@@ -126,7 +130,3 @@ var generateSelectbox = React.createClass({displayName: 'generateSelectbox',
     );
   }
 });
-React.renderComponent(
-  formjs( {fields:fields, info:info} ),
-  document.body
-);
