@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="build/react.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+    <script type="text/javascript">
+      var elements = [
+        {type: "text", name: "username", label: "new field", placeholder: "username", value: "test"},
+        {type: "password", name: "password", label: "password", placeholder: "password"},
+        {type: "textarea", name: "status", label: "new status", placeholder: "what's up"},
+        {type: "select", name: "select stuff", options: [{value: "hello", text: "this is the text"},{value: "hello2", text: "2nd text"}]}
+      ];
+      var form = {submitText: "Sign up", action: "index.php", type: "post"};
+    </script>
+  </head>
+  <body>
+    <script src="build/forms.js"></script>
+  </body>
+</html>
