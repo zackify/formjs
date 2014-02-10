@@ -5,7 +5,10 @@
     <script type="text/javascript">
       var fields = [
         {type: "text", name: "username", label: "new field", placeholder: "username", value: "test"},
-        {type: "password", name: "password", label: "password", placeholder: "password"},
+        {type: "radio", name: "password", label: "youre lame", placeholder: "password"},
+        {type: "number", name: "number", label: "choose one", min: 2,max: 25,step:3},
+        {type: "range", name: "number", label: "choose one", min: 4,max: 25,step:2},
+        {type: "search", name: "search", required: "required"},
         {type: "textarea", name: "status", label: "new status", placeholder: "what's up"},
         {type: "select", name: "select stuff", options: [{value: "hello", text: "this is the text"},{value: "hello2", text: "2nd text"}]}
       ];

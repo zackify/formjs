@@ -5,6 +5,7 @@ var formjs = React.createClass({
     var currentValues = this.state.values;
     currentValues[element.id] = {name: element.name, value: element.value};
     this.setState({values: currentValues});
+    console.log(this.state.values);
     return false;
   },
   handleSubmit: function() {
@@ -33,7 +34,21 @@ var formjs = React.createClass({
         label        = {element.label} 
         name         = {element.name} 
         placeholder  = {element.placeholder} 
-        value        = {element.value} 
+        value        = {element.value}
+        required     = {element.required}
+        updateValues = {updateValues} 
+        id           = {id} />;
+      }
+      else if(element.type == "number" || element.type == "range"){
+        return <generateNumberField 
+        label        = {element.label} 
+        name         = {element.name} 
+        type         = {element.type} 
+        value        = {element.value}
+        min          = {element.min} 
+        max          = {element.max} 
+        step         = {element.step}
+        required     = {element.required}
         updateValues = {updateValues} 
         id           = {id} />;
       }
@@ -50,13 +65,14 @@ var formjs = React.createClass({
         label        = {element.label} 
         name         = {element.name} 
         placeholder  = {element.placeholder} 
-        value        = {element.value} 
+        value        = {element.value}
+        required     = {element.required}
         updateValues = {updateValues}
         id           = {id} />;
       }
     });
     return(
-      <form ref="form" onSubmit={this.handleSubmit}>
+      <form onSubmit={this.handleSubmit}>
         {elements}
         <input type="submit" value={this.state.form.submitText} />
       </form>
@@ -79,7 +95,39 @@ var generateInputField = React.createClass({
     return(
       <div className="element textfield">
       <label>{this.props.label}</label>
-      <input type={this.props.type} placeholder={this.props.placeholder} value={this.state.value} onChange={this.handleChange}/>
+      <input type = {this.props.type}
+      placeholder = {this.props.placeholder}
+      value       = {this.state.value}
+      required    = {this.props.required}
+      onChange    = {this.handleChange}/>
+      </div>
+    );
+  }
+});
+
+// number fields
+
+var generateNumberField = React.createClass({
+  getInitialState: function() {
+    return {value: this.props.value};
+  },
+  handleChange: function(e) {
+    var name = this.props.name;
+    var value = e.target.value;
+    this.props.updateValues({id: this.props.id, name: name, value: value});
+    this.setState({value: value});
+  },
+  render: function(){
+    return(
+      <div className="element number">
+      <label>{this.props.label}</label>
+      <input 
+      type      = {this.props.type} min="0"
+       max      = {this.props.max}
+       step     = {this.props.step}
+       value    = {this.props.value}
+       required = {this.props.required}
+       onChange = {this.handleChange}/>
       </div>
     );
   }
@@ -100,7 +148,7 @@ var generateTextarea = React.createClass({
     return(
       <div className="element textarea">
       <label>{this.props.label}</label>
-      <textarea placeholder={this.props.placeholder} onChange={this.handleChange}>{this.state.value}</textarea>
+      <textarea placeholder={this.props.placeholder} required={this.props.required} onChange={this.handleChange}>{this.state.value}</textarea>
       </div>
     );
   }
