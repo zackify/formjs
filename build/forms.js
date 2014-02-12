@@ -5,15 +5,14 @@ var formjs = React.createClass({displayName: 'formjs',
     var currentValues = this.state.values;
     currentValues[element.id] = {name: element.name, value: element.value};
     this.setState({values: currentValues});
-    console.log(this.state.values);
     return false;
   },
   handleSubmit: function() {
-  $.ajax({
-      url: this.state.form.action,
+    $.ajax({
+      url: this.state.data.href,
       dataType: 'json',
       data: this.state.values,
-      type: this.state.form.type,
+      type: this.state.data.method,
       success: function(data) {
         //this.setState({data: data});
       }.bind(this)
@@ -21,52 +20,43 @@ var formjs = React.createClass({displayName: 'formjs',
     return false;
   },
   getInitialState: function(){
-    return{ data: this.props.fields, form: this.props.info,values: []};
+    //console.log(this.props.data);
+    return{ data: this.props.data,properties: this.props.data.schema.properties, values: []};
 
   },
   render: function() {
     var updateValues = this.updateValues;
     var id = 0;
-    var elements = this.state.data.map(function (element) {
+    //console.log(this.state.properties);
+    var elements = _.map(this.state.properties, function (property,name) {
       id++;
-      if(element.type == "textarea"){
-        return generateTextarea( 
-        {label:         element.label, 
-        name:          element.name, 
-        placeholder:   element.placeholder, 
-        value:         element.value,
-        required:      element.required,
-        updateValues:  updateValues, 
-        id:            id} );
-      }
-      else if(element.type == "number" || element.type == "range"){
-        return generateNumberField( 
-        {label:         element.label, 
-        name:          element.name, 
-        type:          element.type, 
-        value:         element.value,
-        min:           element.min, 
-        max:           element.max, 
-        step:          element.step,
-        required:      element.required,
-        updateValues:  updateValues, 
-        id:            id} );
-      }
-      else if(element.type == "select"){
-        return generateSelectbox( 
-        {name:          element.name, 
-        options:       element.options,
-        updateValues:  updateValues, 
-        id:            id} );
-      }
-      else{
+      if(property.type == "string"){
+        var fieldType = "text";
+        if (property.format) fieldType = property.format;
+        if (!property.title) property.title = name;
+
         return generateInputField( 
-        {type:          element.type, 
-        label:         element.label, 
-        name:          element.name, 
-        placeholder:   element.placeholder, 
-        value:         element.value,
-        required:      element.required,
+        {type:          fieldType, 
+        label:         property.title, 
+        name:          name, 
+        placeholder:   property['ux-placeholder'], 
+        value:         property.value,
+        required:      property.required,
+        updateValues:  updateValues,
+        id:            id} );
+      }
+      if(property.type == "number"){
+        var fieldType = "number";
+        if (property.format) fieldType = property.format; // if you want to use a range field
+        if (!property.title) property.title = name;
+        
+        return generateInputField( 
+        {type:          fieldType, 
+        label:         property.title, 
+        name:          name, 
+        placeholder:   property['ux-placeholder'], 
+        value:         property.value,
+        required:      property.required,
         updateValues:  updateValues,
         id:            id} );
       }
@@ -74,9 +64,10 @@ var formjs = React.createClass({displayName: 'formjs',
     return(
       React.DOM.form( {onSubmit:this.handleSubmit}, 
         elements,
-        React.DOM.input( {type:"submit", value:this.state.form.submitText} )
+        React.DOM.input( {type:"submit", value:this.state.data['ux-submit-text']} )
       )
     );
+    
   }
 });
 //regular input fields
@@ -104,77 +95,7 @@ var generateInputField = React.createClass({displayName: 'generateInputField',
     );
   }
 });
-
-// number fields
-
-var generateNumberField = React.createClass({displayName: 'generateNumberField',
-  getInitialState: function() {
-    return {value: this.props.value};
-  },
-  handleChange: function(e) {
-    var name = this.props.name;
-    var value = e.target.value;
-    this.props.updateValues({id: this.props.id, name: name, value: value});
-    this.setState({value: value});
-  },
-  render: function(){
-    return(
-      React.DOM.div( {className:"element number"}, 
-      React.DOM.label(null, this.props.label),
-      React.DOM.input( 
-      {type:       this.props.type, min:"0",
-       max:       this.props.max,
-       step:      this.props.step,
-       value:     this.props.value,
-       required:  this.props.required,
-       onChange:  this.handleChange})
-      )
-    );
-  }
-});
-//textarea
-
-var generateTextarea = React.createClass({displayName: 'generateTextarea',
-  getInitialState: function() {
-    return {value: this.props.value};
-  },
-  handleChange: function(e) {
-    var name = this.props.name;
-    var value = e.target.value;
-    this.props.updateValues({id: this.props.id, name: name, value: value});
-    this.setState({value: value});
-  },
-  render: function(){
-    return(
-      React.DOM.div( {className:"element textarea"}, 
-      React.DOM.label(null, this.props.label),
-      React.DOM.textarea( {placeholder:this.props.placeholder, required:this.props.required, onChange:this.handleChange}, this.state.value)
-      )
-    );
-  }
-});
-//select box
-var generateSelectbox = React.createClass({displayName: 'generateSelectbox',
-  handleChange: function(e) {
-    var name = this.props.name;
-    var value = e.target.value;
-    this.props.updateValues({id: this.props.id, name: name, value: value});
-  },
-  render: function(){
-    var options = this.props.options.map(function (option) {
-      return  React.DOM.option( {value:option.value}, option.text)
-    });
-    return(
-      React.DOM.div( {className:"element select"}, 
-      React.DOM.label(null, this.props.label),
-      React.DOM.select( {onChange:this.handleChange}, 
-      options
-      )
-      )
-    );
-  }
-});
 React.renderComponent(
-  formjs( {fields:fields, info:info} ),
+  formjs( {data:json} ),
   document.body
 );

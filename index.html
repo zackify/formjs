@@ -2,17 +2,47 @@
 <html>
   <head>
     <script src="build/react.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+    <script src="underscore-min.js"></script>
     <script type="text/javascript">
-      var fields = [
-        {type: "text", name: "username", label: "new field", placeholder: "username", value: "test"},
-        {type: "radio", name: "password", label: "youre lame", placeholder: "password"},
-        {type: "number", name: "number", label: "choose one", min: 2,max: 25,step:3},
-        {type: "range", name: "number", label: "choose one", min: 4,max: 25,step:2},
-        {type: "search", name: "search", required: "required"},
-        {type: "textarea", name: "status", label: "new status", placeholder: "what's up"},
-        {type: "select", name: "select stuff", options: [{value: "hello", text: "this is the text"},{value: "hello2", text: "2nd text"}]}
-      ];
-      var info = {submitText: "Sign up", action: "index.php", type: "post"};
+      var json = {
+        "description": null, 
+        "title": "Site Detail",
+        "ux-submit-text" : "submit form",
+        "href": "/api/v2/sites/{site_id}/", 
+        "rel": "update", 
+        "method": "PUT", 
+        "schema": {
+            "type": "object", 
+            "properties": {
+                "name": {
+                    "type": "string", 
+                    "description": "\n        Your Site Name will appear in the title bar of the browser. It tells\n        users and search engines what your site is about.\n    ", 
+                    "title": "Site name"
+                }, 
+                "domain": {
+                    "type": "string", 
+                    "description": "\n        <p><b>Use Your Own Address!</b></p>\n\n        <p>Point a domain name that you own to your Montagable site. Simply\n            create the appropriate CNAME with your domain registrar, and then\n            enter your custom domain in the box above. In 72-hours or less,\n            your visitors will be able to find you at www.yourcustomdomain.com.</p>\n\n        <p>Don't know what a CNAME is? Don't want to mess with this stuff?\n            Check out <a href=\"http://montagable.com/help/using-domain/\" target=\"_blank\">\n            this page of our help documentation</a>, OR email our super responsive\n            support team at <a href=\"mailto:support@montagable.com\">support@montagable.com</a>.</p>\n    ", 
+                    "title": "Domain"
+                }, 
+                "google_analytics_id": {
+                    "type": "number", 
+                    "title": "google analytics",
+                    "ux-placeholder": "ex. 2342342"
+                }, 
+                "admin_email": {
+                    "type": "string",
+                    "format": "email",
+                    "ux-placeholder": "Email"
+                },
+                "slug": {
+                    "type": "string", 
+                    "description": "", 
+                    "title": "Subdomain"
+                }
+            }
+        }
+    };
     </script>
   </head>
   <body>
