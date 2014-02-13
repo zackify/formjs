@@ -63,6 +63,22 @@ All that you really need to do is create a new variable called *json*, but this 
 
 The variables passed through json are very self explanatory. More information on the different types of things you can pass to formjs will be released when the first version is finished in the next week or so.
 
+Retrieving Form data
+--
+There's two neat callback functions that you must make in order to recieve data from formjs. You can see them both in the index.html file, but I'll put it here too:
+
+```
+function currentState(data){
+        console.log('current state:');
+        console.log(data);
+}
+function submitState(data){
+        console.log('submit state:');
+        console.log(data);
+}
+
+```
+The current state function will be called as the user changes any form fields, the submit state one will only be called once the submit button is pressed. This way, you can do whatever you want with your data. You'll recieve an array that can be passed to an ajax call using jQuery or really, whatever you want.
 Version
 ----
 
