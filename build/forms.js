@@ -19,14 +19,12 @@ var formjs = React.createClass({displayName: 'formjs',
     return false;
   },
   getInitialState: function(){
-    //console.log(this.props.data);
     return{ data: this.props.data,properties: this.props.data.schema.properties, values: []};
 
   },
   render: function() {
     var updateValues = this.updateValues;
     var id = 0;
-    //console.log(this.state.properties);
     var elements = _.map(this.state.properties, function (property,name) {
       id++;
       if(property.type == "array"){
@@ -105,7 +103,11 @@ var generateInputField = React.createClass({displayName: 'generateInputField',
     );
   }
 });
+var forms = [];
+for (var i = 0; i < json.length; i++) {
+    forms.push(formjs( {data:json[i], submitState:submitState, currentState:currentState} ));
+}
 React.renderComponent(
-  formjs( {data:json, submitState:submitState, currentState:currentState} ),
+  React.DOM.div(null, forms),
   document.body
 );
