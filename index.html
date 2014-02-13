@@ -2,9 +2,17 @@
 <html>
   <head>
     <script src="build/react.min.js"></script>
-    <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
     <script src="underscore-min.js"></script>
     <script type="text/javascript">
+
+    function currentState(data){
+        console.log('current state:');
+        console.log(data);
+    }
+    function submitState(data){
+        console.log('submit state:');
+        console.log(data);
+    }
       var json = {
         "description": null, 
         "title": "Site Detail",
@@ -39,6 +47,33 @@
                     "type": "string", 
                     "description": "", 
                     "title": "Subdomain"
+                },
+                "favicon": {
+                    "ux-widget": "file-select", 
+                    "format": "uri", 
+                    "type": "string", 
+                    "description": "\n        A Favicon is the small icon that shows up in the corner of your browser tab.\n    ", 
+                    "title": "favicon"
+                }, 
+                "bullets": {
+                    "items": {
+                        "type": "object", 
+                        "properties": {
+                            "text": {
+                                "type": "string", 
+                                "description": null, 
+                                "title": "text"
+                            },
+                            "username": {
+                                "type": "string", 
+                                "description": null, 
+                                "title": "cool username"
+                            }
+                        }
+                        }, 
+                        "type": "array", 
+                        "description": "", 
+                        "title": "Bullets"
                 }
             }
         }
