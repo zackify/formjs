@@ -3,20 +3,18 @@ Formjs - ReactJS Forms
 
 Formjs generates HTML5 forms using [JSON Schema] data
 
-  - Currently Uses [jQuery] for the ajax requests, will be removed soon though.
-  - Utilizes [Underscore] for object mapping, will possibly be turned into a React function to removed unneeded dependencies
+  - Utilizes [Underscore] for object to array mapping, will possibly be turned into a standalone function to remove unneeded dependencies
 
 Installation
 --------------
 The library itself is very simple. All you need to do is include it in your header along with the dependencies:
 ```
 <script src="build/react.min.js"></script>
-<script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
 <script src="underscore-min.js"></script>
 ```
 Passing Form Information
 --
-All that you really need to do is create a new variable called *json*, but this can be changed. Here's an example way to pass the json schemda data to formjs
+All you need to do is create a new variable called *json*, but this can be changed. Here's an example way to pass the json schema data to formjs
 ```
 <script type="text/javascript">
       var json = {
