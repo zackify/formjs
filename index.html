@@ -13,7 +13,59 @@
         console.log('submit state:');
         console.log(data);
     }
-      var json = [{
+      var json = [
+        {
+            "description": "Create A doo hicky", 
+            "schema": {
+                "type": "object", 
+                "properties": {
+                    "title": {
+                        "type": "string",  
+                        "title": "title"
+                    }, 
+                    "bullets": {
+                        "items": {
+                            "type": "object", 
+                            "properties": {
+                                "text": {
+                                    "type": "string", 
+                                    "description": null, 
+                                    "title": "text"
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "enum": [1.5, 5.5, 9.5]
+                                }
+                            }
+                        }, 
+                        "type": "array", 
+                        "description": "", 
+                        "title": "Bullets"
+                    }, 
+                    "are_you_awesome": {
+                        "type": "boolean"
+                    },
+                    "chromosome_configuration": {
+                        "type": "string",
+                        "enum": ["male", "female"]
+                    },
+                    "age": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 150
+                    },
+                    "birthday": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                }
+            }
+        },
+      {
         "description": null, 
         "title": "Site Detail",
         "ux-submit-text" : "submit form",

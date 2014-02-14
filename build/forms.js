@@ -33,18 +33,24 @@ var formjs = React.createClass({displayName: 'formjs',
           var childElements = _.map(property.items.properties, function (property,name) {
             childId++;
             var fieldType = "text";
-            return generateInputField( 
-            {type:          fieldType, 
-            label:         property.title, 
-            name:          name, 
-            placeholder:   property['ux-placeholder'], 
-            value:         property.value,
-            required:      property.required,
-            description:   property.description,
-            updateValues:  updateValues,
-            child:         "true",
-            id:            id,
-            childId:       childId} );
+            if (property.type == "number") fieldType = "number";
+            if (property.format) fieldType = property.format;
+            if (!property.title) property.title = name;
+
+            if(property.enum) fieldType = "select";
+              return generateField( 
+              {type:          fieldType,
+              items:         property.enum,
+              label:         property.title, 
+              name:          name, 
+              placeholder:   property['ux-placeholder'], 
+              value:         property.value,
+              required:      property.required,
+              description:   property.description,
+              updateValues:  updateValues,
+              child:         "true",
+              id:            id,
+              childId:       childId} );
           });
           return childElements;
         }
@@ -55,7 +61,7 @@ var formjs = React.createClass({displayName: 'formjs',
           if (property.type == "number") fieldType = "number";
           if (property.format) fieldType = property.format;
           if (!property.title) property.title = name;
-          return generateInputField( 
+          return generateField( 
           {type:          fieldType, 
           label:         property.title, 
           name:          name, 
@@ -68,20 +74,31 @@ var formjs = React.createClass({displayName: 'formjs',
         }
       }
     });
+    var formDescription;
+    if(this.state.data.description){
+      formDescription = React.DOM.p( {dangerouslySetInnerHTML:{__html: this.state.data.description}} );
+    }
+
     return(
+      React.DOM.div(null, 
+      formDescription,
       React.DOM.form( {encType:"multipart/form-data", onSubmit:this.handleSubmit}, 
         elements,
         React.DOM.input( {type:"submit", value:this.state.data['ux-submit-text']} )
+      )
       )
     );
     
   }
 });
-//regular input fields
 
-var generateInputField = React.createClass({displayName: 'generateInputField',
+
+var generateField = React.createClass({displayName: 'generateField',
   getInitialState: function() {
     return {value: this.props.value};
+  },
+  componentDidMount: function(){
+    this.props.updateValues({id: this.props.id, name: this.props.name, value: this.props.value,child: this.props.child,childId: this.props.childId});
   },
   handleChange: function(e) {
     var name = this.props.name;
@@ -90,17 +107,33 @@ var generateInputField = React.createClass({displayName: 'generateInputField',
     this.setState({value: value});
   },
   render: function(){
-    return(
-      React.DOM.div( {className:"element textfield"}, 
-      React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
-      React.DOM.label(null, this.props.label),
-      React.DOM.input( {type:  this.props.type,
-      placeholder:  this.props.placeholder,
-      value:        this.state.value,
-      required:     this.props.required,
-      onChange:     this.handleChange})
-      )
-    );
+    if(this.props.type == "select"){
+      var options = this.props.items.map(function (option) {
+        return  React.DOM.option( {value:option}, option)
+      });
+      return(
+        React.DOM.div( {className:"element select"}, 
+        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
+        React.DOM.label(null, this.props.label),
+        React.DOM.select( {onChange:this.handleChange}, 
+        options
+        )
+        )
+      );
+    }
+    else{
+      return(
+        React.DOM.div( {className:"element textfield"}, 
+        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
+        React.DOM.label(null, this.props.label),
+        React.DOM.input( {type:  this.props.type,
+        placeholder:  this.props.placeholder,
+        value:        this.state.value,
+        required:     this.props.required,
+        onChange:     this.handleChange})
+        )
+      );
+    }
   }
 });
 var forms = [];
