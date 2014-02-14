@@ -12,9 +12,19 @@ The library itself is very simple. All you need to do is include it in your head
 <script src="build/react.min.js"></script>
 <script src="underscore-min.js"></script>
 ```
+
+Supported Form Elements and their Markup
+--
+Formjs is still a work in progress but should be completed before the end of February, then this section will be completed.
+
+**Form Elements**
+    - Any text based field (text,password,url,etc)
+    - select boxes
+    - the rest are coming shortly
+
 Passing Form Information
 --
-*Update 2/13/14* you can now pass multiple forms ass demonstrated in the index.html file
+*Update 2/13/14* you can now pass multiple forms as demonstrated in the index.html file
 
 All you need to do is create a new variable called *json*, but this can be changed. Here's an example way to pass the json schema data to formjs
 ```
@@ -78,8 +88,8 @@ function submitState(data){
 The current state function will be called as the user changes any form fields, the submit state one will only be called once the submit button is pressed. This way, you can do whatever you want with your data. You'll recieve an array that can be passed to an ajax call using jQuery or really, whatever you want.
 Version
 ----
-**Februrary 13th:** Multiple form support - still only text inputs
-**Februrary 11th:** Prerelease documentaion
+    - **Februrary 13th:** Multiple form support - still only text inputs
+    - **Februrary 11th:** Prerelease documentaion
 
 
 Adding Your Own Features
