@@ -62,8 +62,12 @@ var formjs = React.createClass({
           if (property.type == "number") fieldType = "number";
           if (property.format) fieldType = property.format;
           if (!property.title) property.title = name;
+
+          if(property.enum && property.enum.length > 2) fieldType = "select";
+          if(property.enum && property.enum.length == 2) fieldType = "radio";
           return <generateField 
           type         = {fieldType} 
+          items        = {property.enum}
           label        = {property.title} 
           name         = {name} 
           placeholder  = {property['ux-placeholder']} 
