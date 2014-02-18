@@ -37,7 +37,8 @@ var formjs = React.createClass({
             if (property.format) fieldType = property.format;
             if (!property.title) property.title = name;
 
-            if(property.enum) fieldType = "select";
+            if(property.enum && property.enum.length > 2) fieldType = "select";
+            if(property.enum && property.enum.length == 2) fieldType = "radio";
               return <generateField 
               type         = {fieldType}
               items        = {property.enum}
@@ -52,7 +53,7 @@ var formjs = React.createClass({
               id           = {id}
               childId      = {childId} />;
           });
-          return childElements;
+          return <div className="child"><p>{property.title}</p>{childElements}</div>;
         }
       }
       else{
@@ -118,6 +119,26 @@ var generateField = React.createClass({
         <select onChange={this.handleChange}>
         {options}
         </select>
+        </div>
+      );
+    }
+    if(this.props.type == "radio"){
+      return(
+        <div className="element radio">
+        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
+        <label>{this.props.label}</label><br />
+        <label>{this.props.items[0]}</label>
+        <input type = {this.props.type}
+        value       = {this.props.items[0]}
+        required    = {this.props.required}
+        name        = {this.props.name}
+        onChange    = {this.handleChange}/>
+        <label>{this.props.items[1]}</label>
+        <input type = {this.props.type}
+        value       = {this.props.items[1]}
+        required    = {this.props.required}
+        name        = {this.props.name}
+        onChange    = {this.handleChange}/>
         </div>
       );
     }

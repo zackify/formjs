@@ -37,7 +37,8 @@ var formjs = React.createClass({displayName: 'formjs',
             if (property.format) fieldType = property.format;
             if (!property.title) property.title = name;
 
-            if(property.enum) fieldType = "select";
+            if(property.enum && property.enum.length > 2) fieldType = "select";
+            if(property.enum && property.enum.length == 2) fieldType = "radio";
               return generateField( 
               {type:          fieldType,
               items:         property.enum,
@@ -52,7 +53,7 @@ var formjs = React.createClass({displayName: 'formjs',
               id:            id,
               childId:       childId} );
           });
-          return childElements;
+          return React.DOM.div( {className:"child"}, React.DOM.p(null, property.title),childElements);
         }
       }
       else{
@@ -118,6 +119,26 @@ var generateField = React.createClass({displayName: 'generateField',
         React.DOM.select( {onChange:this.handleChange}, 
         options
         )
+        )
+      );
+    }
+    if(this.props.type == "radio"){
+      return(
+        React.DOM.div( {className:"element radio"}, 
+        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
+        React.DOM.label(null, this.props.label),React.DOM.br(null ),
+        React.DOM.label(null, this.props.items[0]),
+        React.DOM.input( {type:  this.props.type,
+        value:        this.props.items[0],
+        required:     this.props.required,
+        name:         this.props.name,
+        onChange:     this.handleChange}),
+        React.DOM.label(null, this.props.items[1]),
+        React.DOM.input( {type:  this.props.type,
+        value:        this.props.items[1],
+        required:     this.props.required,
+        name:         this.props.name,
+        onChange:     this.handleChange})
         )
       );
     }

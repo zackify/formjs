@@ -6,12 +6,12 @@
     <script type="text/javascript">
 
     function currentState(data){
-        console.log('current state:');
+        //console.log('current state:');
         console.log(data);
     }
     function submitState(data){
-        console.log('submit state:');
-        console.log(data);
+        //console.log('submit state:');
+        //console.log(data);
     }
       var json = [
         {
@@ -35,9 +35,15 @@
                                 "score": {
                                     "type": "number",
                                     "enum": [1.5, 5.5, 9.5]
+                                },
+                                "games": {
+                                    "type": "number",
+                                    "title": "do you like gaming?",
+                                    "enum": ["yes", "no"]
                                 }
                             }
                         }, 
+                        
                         "type": "array", 
                         "description": "", 
                         "title": "Bullets"
