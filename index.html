@@ -7,12 +7,34 @@
 
     function currentState(data){
         //console.log('current state:');
-        console.log(data);
+        //console.log(data);
     }
     function submitState(data){
         //console.log('submit state:');
         //console.log(data);
     }
+      var values = {
+    "title": "Hello world",
+    "bullets": [
+        {
+            "text": "hello",
+            "score": 5.5
+        },
+        {
+            "text": "world",
+            "score": 9.5
+        },
+        {
+            "text": "the end",
+            "score": 1.5
+        },
+    ],
+    "are_you_awesome": true,
+    "chromosome_configuration": "male",
+    "age": 21,
+    "birthday": "1970-01-01",
+    "email": "thedude@gmail.com"
+};
       var json = [
         {
             "description": "Create A doo hicky", 
@@ -34,13 +56,15 @@
                                 },
                                 "score": {
                                     "type": "number",
+                                    "title": "score",
                                     "enum": [1.5, 5.5, 9.5]
                                 },
-                                "games": {
+                                "test": {
                                     "type": "number",
-                                    "title": "do you like gaming?",
-                                    "enum": ["yes", "no"]
+                                    "title": "test",
+                                    "enum": [1.6, 5.5, 9.5]
                                 }
+
                             }
                         }, 
                         
@@ -184,6 +208,7 @@
             }
         }
     }];
+    alert(data['title']);
     </script>
   </head>
   <body>

@@ -30,18 +30,46 @@ var formjs = React.createClass({displayName: 'formjs',
       if(property.type == "array"){
         if(property.items.properties){
           var childId = 0;
-          var childElements = _.map(property.items.properties, function (property,name) {
+          var fixedProps = {};
+          var i = 0;
+          //console.log(property.items.properties);
+          var count = 0;
+          for(var prop in property.items.properties) {
+            if(property.items.properties.hasOwnProperty(prop))
+              console.log(values['bullets'][count]);
+            ++count;
+          }
+          if(count >= 2){
+            for (var key in property.items.properties) {
+             //console.log(property.items.properties[key]);
+             var newKey = key + '1';
+             fixedProps[key] = property.items.properties[key];
+             fixedProps[i] = property.items.properties[key];
+             if(count > 2){
+             var amount = count - 2;
+             _(amount).times(function (n){
+              var num = n + 1;
+              fixedProps[i+50*num] = property.items.properties[key];
+             });
+             }
+             i++;
+            }
+          }
+          //console.log(count);
+          var stop = count - 1;
+          var childElements = _.map(fixedProps, function (property,name) {
             childId++;
             var fieldType = "text";
             if (property.type == "number") fieldType = "number";
             if (property.format) fieldType = property.format;
             if (!property.title) property.title = name;
-
             if(property.enum && property.enum.length > 2) fieldType = "select";
             if(property.enum && property.enum.length == 2) fieldType = "radio";
-              return generateField( 
+            var fields = [];
+            fields.push(generateField( 
               {type:          fieldType,
               items:         property.enum,
+              values:        values.bullets,
               label:         property.title, 
               name:          name, 
               placeholder:   property['ux-placeholder'], 
@@ -51,7 +79,8 @@ var formjs = React.createClass({displayName: 'formjs',
               updateValues:  updateValues,
               child:         "true",
               id:            id,
-              childId:       childId} );
+              childId:       childId} ));
+            return fields;
           });
           return React.DOM.div( {className:"child"}, React.DOM.p(null, property.title),childElements);
         }
@@ -71,7 +100,7 @@ var formjs = React.createClass({displayName: 'formjs',
           label:         property.title, 
           name:          name, 
           placeholder:   property['ux-placeholder'], 
-          value:         property.value,
+          value:         values[name],
           required:      property.required,
           description:   property.description,
           updateValues:  updateValues,
@@ -113,6 +142,7 @@ var generateField = React.createClass({displayName: 'generateField',
   },
   render: function(){
     if(this.props.type == "select"){
+      var name = this.props.name;
       var options = this.props.items.map(function (option) {
         return  React.DOM.option( {value:option}, option)
       });
@@ -127,6 +157,8 @@ var generateField = React.createClass({displayName: 'generateField',
       );
     }
     if(this.props.type == "radio"){
+      if(this.props.value == this.props.items[0]) var selectedFirst = "checked";
+      if(this.props.value == this.props.items[1]) var selectedSecond = "checked";
       return(
         React.DOM.div( {className:"element radio"}, 
         React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
@@ -136,12 +168,14 @@ var generateField = React.createClass({displayName: 'generateField',
         value:        this.props.items[0],
         required:     this.props.required,
         name:         this.props.name,
+        checked:      selectedFirst,
         onChange:     this.handleChange}),
         React.DOM.label(null, this.props.items[1]),
         React.DOM.input( {type:  this.props.type,
         value:        this.props.items[1],
         required:     this.props.required,
         name:         this.props.name,
+        checked:     selectedSecond,
         onChange:     this.handleChange})
         )
       );
@@ -163,7 +197,7 @@ var generateField = React.createClass({displayName: 'generateField',
 });
 var forms = [];
 for (var i = 0; i < json.length; i++) {
-    forms.push(formjs( {data:json[i], submitState:submitState, currentState:currentState} ));
+    forms.push(formjs( {data:json[i], values:values[i], submitState:submitState, currentState:currentState} ));
 }
 React.renderComponent(
   React.DOM.div(null, forms),
