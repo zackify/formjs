@@ -36,28 +36,36 @@ var formjs = React.createClass({
           var count = 0;
           for(var prop in property.items.properties) {
             if(property.items.properties.hasOwnProperty(prop))
-              console.log(values['bullets'][count]);
+              //console.log(values['bullets'][count]);
             ++count;
           }
           if(count >= 2){
+            arrayNum = 0;
             for (var key in property.items.properties) {
              //console.log(property.items.properties[key]);
-             var newKey = key + '1';
+             if(i == count - 1) break;
              fixedProps[key] = property.items.properties[key];
              fixedProps[i] = property.items.properties[key];
              if(count > 2){
-             var amount = count - 2;
-             _(amount).times(function (n){
-              var num = n + 1;
-              fixedProps[i+50*num] = property.items.properties[key];
-             });
+               var amount = count - 2;
+               _(amount).times(function (n){
+                var num = n + 1;
+                fixedProps[i+50*num] = property.items.properties[key];
+               });
              }
              i++;
             }
+            arrayNum++;
+            //console.log(fixedProps);
           }
-          //console.log(count);
           var stop = count - 1;
+          var test = -1;
+          //console.log(fixedProps);
           var childElements = _.map(fixedProps, function (property,name) {
+            property.value = '';
+              if(childId < 2) property.value = values['bullets'][0][property.title];
+              if(childId >= 2 && childId < 4) property.value = values['bullets'][1][property.title];
+              if(childId >= 4 && childId < 6) property.value = values['bullets'][2][property.title];
             childId++;
             var fieldType = "text";
             if (property.type == "number") fieldType = "number";
@@ -66,6 +74,7 @@ var formjs = React.createClass({
             if(property.enum && property.enum.length > 2) fieldType = "select";
             if(property.enum && property.enum.length == 2) fieldType = "radio";
             var fields = [];
+            //console.log(property.value);
             fields.push(<generateField 
               type         = {fieldType}
               items        = {property.enum}
@@ -143,6 +152,7 @@ var generateField = React.createClass({
   render: function(){
     if(this.props.type == "select"){
       var name = this.props.name;
+      var selected = '';
       var options = this.props.items.map(function (option) {
         return  <option value={option}>{option}</option>
       });
@@ -150,7 +160,7 @@ var generateField = React.createClass({
         <div className="element select">
         <p dangerouslySetInnerHTML={{__html: this.props.description}} />
         <label>{this.props.label}</label>
-        <select onChange={this.handleChange}>
+        <select value={this.props.value} onChange={this.handleChange}>
         {options}
         </select>
         </div>
@@ -196,8 +206,8 @@ var generateField = React.createClass({
   }
 });
 var forms = [];
-for (var i = 0; i < json.length; i++) {
-    forms.push(<formjs data={json[i]} values={values[i]} submitState={submitState} currentState={currentState} />);
+for (var i = 0; i < 1; i++) { //json.length
+    forms.push(<formjs data={json[i]} values={values[i]} number={i} submitState={submitState} currentState={currentState} />);
 }
 React.renderComponent(
   <div>{forms}</div>,
