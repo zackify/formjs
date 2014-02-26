@@ -5,10 +5,14 @@ var formjs = React.createClass({displayName: 'formjs',
     var currentValues = this.state.values;
     if(element.childId){
       if(!currentValues[element.id]) currentValues[element.id] = [];
-      currentValues[element.id][element.childId] = {name: element.name, value: element.value};
+      currentValues[element.id][element.childId] = {name: element.name, title: element.title, value: element.value};
+    }
+    else if(element.bulletId){
+      if(!currentValues[element.id]['bullets']) currentValues[element.id]['bullets'] = [];
+      currentValues[element.id]['bullets'][element.bulletId] = {name: element.name, title: element.title, value: element.value};
     }
     else{
-      currentValues[element.id] = {name: element.name, value: element.value};
+      currentValues[element.id] = {name: element.name, title: element.title, value: element.value};
     }
     this.setState({values: currentValues});
     this.props.currentState(this.state.values);
@@ -32,18 +36,20 @@ var formjs = React.createClass({displayName: 'formjs',
           var childId = 0;
           var fixedProps = {};
           var i = 0;
-          //console.log(property.items.properties);
-          var count = 0;
+          var count= 0;
+          var bulletCount = 0;
           for(var prop in property.items.properties) {
             if(property.items.properties.hasOwnProperty(prop))
-              //console.log(values['bullets'][count]);
             ++count;
+          }
+          for(var prop in values.bullets) {
+            if(values.bullets.hasOwnProperty(prop))
+            ++bulletCount;
           }
           if(count >= 2){
             arrayNum = 0;
             for (var key in property.items.properties) {
-             //console.log(property.items.properties[key]);
-             if(i == count - 1) break;
+             if(i == count) break;
              fixedProps[key] = property.items.properties[key];
              fixedProps[i] = property.items.properties[key];
              if(count > 2){
@@ -56,17 +62,26 @@ var formjs = React.createClass({displayName: 'formjs',
              i++;
             }
             arrayNum++;
-            //console.log(fixedProps);
           }
-          var stop = count - 1;
+          var stop = 0;
           var test = -1;
-          //console.log(fixedProps);
+          var check = 0;
+          var valueKey = 0;
+          var amount = count;
           var childElements = _.map(fixedProps, function (property,name) {
             property.value = '';
-              if(childId < 2) property.value = values['bullets'][0][property.title];
-              if(childId >= 2 && childId < 4) property.value = values['bullets'][1][property.title];
-              if(childId >= 4 && childId < 6) property.value = values['bullets'][2][property.title];
+            if(check == count){
+              if(childId != 3) amount = amount + count;
+              stop = amount + count;
+              check = 0;
+              valueKey++;
+            }
+            if(values['bullets'][valueKey]){
+              if(childId < amount) property.value = values['bullets'][valueKey][property.title];
+              if(childId >= amount && childId < stop) property.value = values['bullets'][valueKey][property.title];
+            }
             childId++;
+            check++;
             var fieldType = "text";
             if (property.type == "number") fieldType = "number";
             if (property.format) fieldType = property.format;
@@ -74,7 +89,6 @@ var formjs = React.createClass({displayName: 'formjs',
             if(property.enum && property.enum.length > 2) fieldType = "select";
             if(property.enum && property.enum.length == 2) fieldType = "radio";
             var fields = [];
-            //console.log(property.value);
             fields.push(generateField( 
               {type:          fieldType,
               items:         property.enum,
@@ -91,7 +105,8 @@ var formjs = React.createClass({displayName: 'formjs',
               childId:       childId} ));
             return fields;
           });
-          return React.DOM.div( {className:"child"}, React.DOM.p(null, property.title),childElements);
+          
+          return React.DOM.div( {className:"child"}, React.DOM.p(null, property.title),childElements, addField( {fields:property.items.properties, updateValues:updateValues, id:id, fieldCount:count} ));
         }
       }
       else{
@@ -135,18 +150,59 @@ var formjs = React.createClass({displayName: 'formjs',
   }
 });
 
-
+var addField = React.createClass({displayName: 'addField',
+ getInitialState: function() {
+    return {fields: this.props.fields, generatedFields: []};
+  },
+  handleClick: function(event) {
+    var bulletId = this.state.generatedFields.length * this.props.fieldCount;
+    var updateValues = this.props.updateValues;
+    var id = this.props.id;
+    var generatedFields = _.map(this.state.fields, function (property,name) {
+        var fieldType = "text";
+        if (property.type == "number") fieldType = "number";
+        if (property.format) fieldType = property.format;
+        if (!property.title) property.title = name;
+        if(property.enum && property.enum.length > 2) fieldType = "select";
+        if(property.enum && property.enum.length == 2) fieldType = "radio";
+        bulletId++;
+        return generateField( 
+        {type:          fieldType, 
+        items:         property.enum,
+        label:         property.title, 
+        name:          name, 
+        placeholder:   property['ux-placeholder'], 
+        value:         values[name],
+        required:      property.required,
+        updateValues:  updateValues,
+        description:   property.description,
+        id:            id,
+        bulletId:      bulletId} );
+    });
+    this.state.generatedFields.push(generatedFields);
+    this.forceUpdate();
+  },
+  render: function() {
+    var fields = this.state.generatedFields;
+    return (
+      React.DOM.div( {className:"extraBullets"}, 
+        fields,
+        React.DOM.div( {className:"button", onClick:this.handleClick}, "Add")
+      )
+    );
+  }
+});
 var generateField = React.createClass({displayName: 'generateField',
   getInitialState: function() {
     return {value: this.props.value};
   },
   componentDidMount: function(){
-    this.props.updateValues({id: this.props.id, name: this.props.name, value: this.props.value,child: this.props.child,childId: this.props.childId});
+    this.props.updateValues({id: this.props.id, name: this.props.name, title: this.props.label, value: this.props.value,child: this.props.child,childId: this.props.childId, bulletId: this.props.bulletId});
   },
   handleChange: function(e) {
     var name = this.props.name;
     var value = e.target.value;
-    this.props.updateValues({id: this.props.id, name: name, value: value,child: this.props.child,childId: this.props.childId});
+    this.props.updateValues({id: this.props.id, name: name, title: this.props.label, value: value,child: this.props.child, childId: this.props.childId, bulletId: this.props.bulletId});
     this.setState({value: value});
   },
   render: function(){
@@ -206,7 +262,7 @@ var generateField = React.createClass({displayName: 'generateField',
   }
 });
 var forms = [];
-for (var i = 0; i < 1; i++) { //json.length
+for (var i = 0; i < json.length; i++) {
     forms.push(formjs( {data:json[i], values:values[i], number:i, submitState:submitState, currentState:currentState} ));
 }
 React.renderComponent(
