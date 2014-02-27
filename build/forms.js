@@ -23,12 +23,13 @@ var formjs = React.createClass({displayName: 'formjs',
     return false;
   },
   getInitialState: function(){
-    return{ data: this.props.data,properties: this.props.data.schema.properties, values: []};
+    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, values: []};
 
   },
   render: function() {
     var updateValues = this.updateValues;
     var id = 0;
+    var iteration = this.state.iteration;
     var elements = _.map(this.state.properties, function (property,name) {
       id++;
       if(property.type == "array"){
@@ -64,7 +65,6 @@ var formjs = React.createClass({displayName: 'formjs',
             arrayNum++;
           }
           var stop = 0;
-          var test = -1;
           var check = 0;
           var valueKey = 0;
           var amount = count;
@@ -76,9 +76,11 @@ var formjs = React.createClass({displayName: 'formjs',
               check = 0;
               valueKey++;
             }
-            if(values['bullets'][valueKey]){
-              if(childId < amount) property.value = values['bullets'][valueKey][property.title];
-              if(childId >= amount && childId < stop) property.value = values['bullets'][valueKey][property.title];
+            if(values[iteration]){
+              if(values[iteration]['bullets'][valueKey]){
+                if(childId < amount) property.value = values[iteration]['bullets'][valueKey][property.title];
+                if(childId >= amount && childId < stop) property.value = values[iteration]['bullets'][valueKey][property.title];
+              }
             }
             childId++;
             check++;
@@ -241,7 +243,7 @@ var generateField = React.createClass({displayName: 'generateField',
         value:        this.props.items[1],
         required:     this.props.required,
         name:         this.props.name,
-        checked:     selectedSecond,
+        checked:      selectedSecond,
         onChange:     this.handleChange})
         )
       );
