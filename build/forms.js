@@ -3,6 +3,11 @@
 var formjs = React.createClass({displayName: 'formjs',
   updateValues: function(element){
     var currentValues = this.state.values;
+    values = {};
+    if(currentValues) values = this.state.jsonValues;
+    var title = element.name;
+    if(element.title) title = element.title;
+
     if(element.childId){
       if(!currentValues[element.id]) currentValues[element.id] = [];
       currentValues[element.id][element.childId] = {name: element.name, title: element.title, value: element.value};
@@ -12,10 +17,14 @@ var formjs = React.createClass({displayName: 'formjs',
       currentValues[element.id]['bullets'][element.bulletId] = {name: element.name, title: element.title, value: element.value};
     }
     else{
-      currentValues[element.id] = {name: element.name, title: element.title, value: element.value};
+      var name = element.name;
+      currentValues[element.id] = {name: element.name, value: element.value};
     }
+    values[title] = element.value;
+    this.setState({jsonValues: values});
     this.setState({values: currentValues});
-    this.props.currentState(this.state.values);
+    //this.props.currentState(this.state.values);
+    this.props.currentState(JSON.stringify(this.state.jsonValues));
     return false;
   },
   handleSubmit: function() {
@@ -23,13 +32,58 @@ var formjs = React.createClass({displayName: 'formjs',
     return false;
   },
   getInitialState: function(){
-    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, values: []};
+    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, values: [], jsonValues: {}};
 
+  },
+  childElements: function(fixedProps,iteration,count,childId,id,updateValues) {
+    var stop = 0;
+    var check = 0;
+    var valueKey = 0;
+    var amount = count;
+    var childElements = _.map(fixedProps, function (property,name) {
+      property.value = '';
+      if(check == count){
+        if(childId != 3) amount = amount + count;
+        stop = amount + count;
+        check = 0;
+        valueKey++;
+      }
+      if(values[iteration]){
+        if(values[iteration]['bullets'][valueKey]){
+          if(childId < amount) property.value = values[iteration]['bullets'][valueKey][property.title];
+          if(childId >= amount && childId < stop) property.value = values[iteration]['bullets'][valueKey][property.title];
+        }
+      }
+      childId++;
+      check++;
+      var fieldType = "text";
+      if (property.type == "number") fieldType = "number";
+      if (property.format) fieldType = property.format;
+      if (!property.title) property.title = name;
+      if(property.enum && property.enum.length > 2) fieldType = "select";
+      if(property.enum && property.enum.length == 2) fieldType = "radio";
+      return generateField( 
+        {type:          fieldType,
+        items:         property.enum,
+        values:        values.bullets,
+        label:         property.title, 
+        name:          name, 
+        placeholder:   property['ux-placeholder'], 
+        value:         property.value,
+        required:      property.required,
+        description:   property.description,
+        updateValues:  updateValues,
+        child:         "true",
+        id:            id,
+        childId:       childId} );
+    });
+    return childElements;
   },
   render: function() {
     var updateValues = this.updateValues;
     var id = 0;
     var iteration = this.state.iteration;
+    var generateElements = this.childElements;
     var elements = _.map(this.state.properties, function (property,name) {
       id++;
       if(property.type == "array"){
@@ -64,51 +118,12 @@ var formjs = React.createClass({displayName: 'formjs',
             }
             arrayNum++;
           }
-          var stop = 0;
-          var check = 0;
-          var valueKey = 0;
-          var amount = count;
-          var childElements = _.map(fixedProps, function (property,name) {
-            property.value = '';
-            if(check == count){
-              if(childId != 3) amount = amount + count;
-              stop = amount + count;
-              check = 0;
-              valueKey++;
-            }
-            if(values[iteration]){
-              if(values[iteration]['bullets'][valueKey]){
-                if(childId < amount) property.value = values[iteration]['bullets'][valueKey][property.title];
-                if(childId >= amount && childId < stop) property.value = values[iteration]['bullets'][valueKey][property.title];
-              }
-            }
-            childId++;
-            check++;
-            var fieldType = "text";
-            if (property.type == "number") fieldType = "number";
-            if (property.format) fieldType = property.format;
-            if (!property.title) property.title = name;
-            if(property.enum && property.enum.length > 2) fieldType = "select";
-            if(property.enum && property.enum.length == 2) fieldType = "radio";
-            var fields = [];
-            fields.push(generateField( 
-              {type:          fieldType,
-              items:         property.enum,
-              values:        values.bullets,
-              label:         property.title, 
-              name:          name, 
-              placeholder:   property['ux-placeholder'], 
-              value:         property.value,
-              required:      property.required,
-              description:   property.description,
-              updateValues:  updateValues,
-              child:         "true",
-              id:            id,
-              childId:       childId} ));
-            return fields;
-          });
-          
-          return React.DOM.div( {className:"child"}, React.DOM.p(null, property.title),childElements, addField( {fields:property.items.properties, updateValues:updateValues, id:id, fieldCount:count} ));
+          var childElements = generateElements(fixedProps,iteration,count,childId,id,updateValues);
+          return React.DOM.div( {className:"child"}, 
+          React.DOM.p(null, property.title),
+          childElements,
+          addField( {fields:property.items.properties, updateValues:updateValues, id:id, fieldCount:count} )
+          );
         }
       }
       else{
@@ -156,32 +171,35 @@ var addField = React.createClass({displayName: 'addField',
  getInitialState: function() {
     return {fields: this.props.fields, generatedFields: []};
   },
-  handleClick: function(event) {
+  generateFields: function(fields){
     var bulletId = this.state.generatedFields.length * this.props.fieldCount;
     var updateValues = this.props.updateValues;
     var id = this.props.id;
-    var generatedFields = _.map(this.state.fields, function (property,name) {
-        var fieldType = "text";
-        if (property.type == "number") fieldType = "number";
-        if (property.format) fieldType = property.format;
-        if (!property.title) property.title = name;
-        if(property.enum && property.enum.length > 2) fieldType = "select";
-        if(property.enum && property.enum.length == 2) fieldType = "radio";
-        bulletId++;
-        return generateField( 
-        {type:          fieldType, 
-        items:         property.enum,
-        label:         property.title, 
-        name:          name, 
-        placeholder:   property['ux-placeholder'], 
-        value:         values[name],
-        required:      property.required,
-        updateValues:  updateValues,
-        description:   property.description,
-        id:            id,
-        bulletId:      bulletId} );
+    var generatedFields = _.map(fields, function (property,name) {
+      var fieldType = "text";
+      if (property.type == "number") fieldType = "number";
+      if (property.format) fieldType = property.format;
+      if (!property.title) property.title = name;
+      if(property.enum && property.enum.length > 2) fieldType = "select";
+      if(property.enum && property.enum.length == 2) fieldType = "radio";
+      bulletId++;
+      return generateField( 
+      {type:          fieldType, 
+      items:         property.enum,
+      label:         property.title, 
+      name:          name, 
+      placeholder:   property['ux-placeholder'], 
+      value:         values[name],
+      required:      property.required,
+      updateValues:  updateValues,
+      description:   property.description,
+      id:            id,
+      bulletId:      bulletId} );
     });
-    this.state.generatedFields.push(generatedFields);
+  return generatedFields;
+  },
+  handleClick: function(event) {
+    this.state.generatedFields.push(this.generateFields(this.state.fields));
     this.forceUpdate();
   },
   render: function() {
@@ -264,7 +282,7 @@ var generateField = React.createClass({displayName: 'generateField',
   }
 });
 var forms = [];
-for (var i = 0; i < json.length; i++) {
+for (var i = 0; i < 1; i++) {
     forms.push(formjs( {data:json[i], values:values[i], number:i, submitState:submitState, currentState:currentState} ));
 }
 React.renderComponent(
