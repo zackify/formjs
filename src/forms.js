@@ -3,43 +3,41 @@
 var formjs = React.createClass({
   updateValues: function(element){
     var currentValues = this.state.values;
-    values = {};
-    if(currentValues) values = this.state.jsonValues;
-    var title = element.name;
-    if(element.title) title = element.title;
-
-    if(element.childId){
-      if(!currentValues[element.id]) currentValues[element.id] = [];
-      currentValues[element.id][element.childId] = {name: element.name, title: element.title, value: element.value};
+    //console.log(element.name);
+    // map through the current values and set the values based on a var, if not set, it wasnt found, so add to next key
+    if(element.bulletId){
+      //console.log(element.childId);
+      console.log('shit');
+      if(!currentValues['children']) currentValues['children'] = []; 
+     currentValues['children'][4+element.id*element.bulletId] = {name: element.name, value: element.value};
     }
-    else if(element.bulletId){
-      if(!currentValues[element.id]['bullets']) currentValues[element.id]['bullets'] = [];
-      currentValues[element.id]['bullets'][element.bulletId] = {name: element.name, title: element.title, value: element.value};
+    else if(element.childId){
+      if(!currentValues['children']) currentValues['children'] = []; 
+      currentValues['children'][element.childId] = {name: element.name, value: element.value};
     }
     else{
       var name = element.name;
       currentValues[element.id] = {name: element.name, value: element.value};
     }
-    values[title] = element.value;
-    this.setState({jsonValues: values});
     this.setState({values: currentValues});
-    //this.props.currentState(this.state.values);
-    this.props.currentState(JSON.stringify(this.state.jsonValues));
-    return false;
+    this.props.currentState(currentValues);
+    //console.log(currentValues);
+         return false;
   },
   handleSubmit: function() {
     this.props.submitState(this.state.values);
     return false;
   },
   getInitialState: function(){
-    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, values: [], jsonValues: {}};
+    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, values: []};
 
   },
-  childElements: function(fixedProps,iteration,count,childId,id,updateValues) {
+  childElements: function(fixedProps,iteration,count,id,updateValues) {
     var stop = 0;
     var check = 0;
     var valueKey = 0;
     var amount = count;
+    var childId = 0;
     var childElements = _.map(fixedProps, function (property,name) {
       property.value = '';
       if(check == count){
@@ -88,7 +86,6 @@ var formjs = React.createClass({
       id++;
       if(property.type == "array"){
         if(property.items.properties){
-          var childId = 0;
           var fixedProps = {};
           var i = 0;
           var count= 0;
@@ -118,7 +115,7 @@ var formjs = React.createClass({
             }
             arrayNum++;
           }
-          var childElements = generateElements(fixedProps,iteration,count,childId,id,updateValues);
+          var childElements = generateElements(fixedProps,iteration,count,id,updateValues);
           return <div className="child">
           <p>{property.title}</p>
           {childElements}
@@ -214,15 +211,16 @@ var addField = React.createClass({
 });
 var generateField = React.createClass({
   getInitialState: function() {
-    return {value: this.props.value};
+    var name = this.props.name;
+    if(this.props.label) name = this.props.label;
+    return {value: this.props.value, name: name};
   },
   componentDidMount: function(){
-    this.props.updateValues({id: this.props.id, name: this.props.name, title: this.props.label, value: this.props.value,child: this.props.child,childId: this.props.childId, bulletId: this.props.bulletId});
+    this.props.updateValues({id: this.props.id, name: this.state.name, value: this.props.value,child: this.props.child,childId: this.props.childId, bulletId: this.props.bulletId});
   },
   handleChange: function(e) {
-    var name = this.props.name;
     var value = e.target.value;
-    this.props.updateValues({id: this.props.id, name: name, title: this.props.label, value: value,child: this.props.child, childId: this.props.childId, bulletId: this.props.bulletId});
+    this.props.updateValues({id: this.props.id, name: this.state.name, value: value,child: this.props.child, childId: this.props.childId, bulletId: this.props.bulletId});
     this.setState({value: value});
   },
   render: function(){
