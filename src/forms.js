@@ -289,8 +289,8 @@ var generateField = React.createClass({
   }
 });
 var forms = [];
-for (var i = 0; i < 1; i++) {
-    forms.push(<formjs data={json[i]} values={values[i]} number={i} submitState={submitState} currentState={currentState} />);
+for (var i = 0; i < schema.length; i++) {
+    forms.push(<formjs data={schema[i]} values={values[i]} number={i} submitState={submitState} currentState={currentState} />);
 }
 React.renderComponent(
   <div>{forms}</div>,
