@@ -8,7 +8,11 @@ var formjs = React.createClass({
     var groupId = element.groupId;
     var value = element.value;
     if(!value) value = '';
-    if(element.child){
+    if(element.bulletGroup){
+      if(!childValues[element.bulletGroup]) childValues[element.bulletGroup] = {};
+      childValues[element.bulletGroup][element.name] = value;
+    }
+    else if(element.child){
       if(!childValues[groupId]) childValues[groupId] = {};
       childValues[groupId][element.name] = value;
     }
@@ -19,12 +23,14 @@ var formjs = React.createClass({
    this.setState({childValues: childValues});
    currentValues = parentValues;
    currentValues['bullets'] = childValues;
-   console.log(JSON.stringify(parentValues));
+   this.props.currentState(JSON.stringify(parentValues));
 
   return false;
   },
   handleSubmit: function() {
-    this.props.submitState(this.state.values);
+    var currentValues = this.state.parentValues;
+    currentValues['childValues'] = this.state.childValues;
+    this.props.submitState(JSON.stringify(currentValues));
     return false;
   },
   getInitialState: function(){
@@ -167,9 +173,9 @@ var formjs = React.createClass({
 
 var addField = React.createClass({
  getInitialState: function() {
-    return {fields: this.props.fields, generatedFields: []};
+    return {fields: this.props.fields, generatedFields: [], bulletGroup: this.props.id};
   },
-  generateFields: function(fields){
+  generateFields: function(fields,bulletGroup){
     var bulletId = this.state.generatedFields.length * this.props.fieldCount;
     var updateValues = this.props.updateValues;
     var id = this.props.id;
@@ -192,13 +198,15 @@ var addField = React.createClass({
       updateValues = {updateValues}
       description  = {property.description}
       id           = {id}
-      bulletId     = {bulletId} />;
+      bulletId     = {bulletId}
+      bulletGroup  = {bulletGroup} />;
     });
   return generatedFields;
   },
   handleClick: function(event) {
-    this.state.generatedFields.push(this.generateFields(this.state.fields));
+    this.state.generatedFields.push(this.generateFields(this.state.fields,this.state.bulletGroup));
     this.forceUpdate();
+    this.setState({bulletGroup: this.state.bulletGroup + 1});
   },
   render: function() {
     var fields = this.state.generatedFields;
@@ -217,11 +225,11 @@ var generateField = React.createClass({
     return {value: this.props.value, name: name};
   },
   componentDidMount: function(){
-    this.props.updateValues({id: this.props.id, groupId: this.props.groupId, name: this.state.name, value: this.props.value,child: this.props.child,childId: this.props.childId, bulletId: this.props.bulletId});
+    this.props.updateValues({id: this.props.id, groupId: this.props.groupId, bulletGroup: this.props.bulletGroup, name: this.state.name, value: this.props.value,child: this.props.child,childId: this.props.childId, bulletId: this.props.bulletId});
   },
   handleChange: function(e) {
     var value = e.target.value;
-    this.props.updateValues({id: this.props.id, groupId: this.props.groupId, name: this.state.name, value: value,child: this.props.child, childId: this.props.childId, bulletId: this.props.bulletId});
+    this.props.updateValues({id: this.props.id, groupId: this.props.groupId, bulletGroup: this.props.bulletGroup, name: this.state.name, value: value,child: this.props.child, childId: this.props.childId, bulletId: this.props.bulletId});
     this.setState({value: value});
   },
   render: function(){
@@ -281,7 +289,7 @@ var generateField = React.createClass({
   }
 });
 var forms = [];
-for (var i = 0; i < json.length; i++) {
+for (var i = 0; i < 1; i++) {
     forms.push(<formjs data={json[i]} values={values[i]} number={i} submitState={submitState} currentState={currentState} />);
 }
 React.renderComponent(
