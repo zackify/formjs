@@ -2,34 +2,33 @@
 //form.js
 var formjs = React.createClass({
   updateValues: function(element){
-    var currentValues = this.state.values;
-    //console.log(element.name);
-    // map through the current values and set the values based on a var, if not set, it wasnt found, so add to next key
-    if(element.bulletId){
-      //console.log(element.childId);
-      console.log('shit');
-      if(!currentValues['children']) currentValues['children'] = []; 
-     currentValues['children'][4+element.id*element.bulletId] = {name: element.name, value: element.value};
-    }
-    else if(element.childId){
-      if(!currentValues['children']) currentValues['children'] = []; 
-      currentValues['children'][element.childId] = {name: element.name, value: element.value};
+    var currentValues = {};
+    var parentValues = this.state.parentValues;
+    var childValues = this.state.childValues;
+    var groupId = element.groupId;
+    var value = element.value;
+    if(!value) value = '';
+    if(element.child){
+      if(!childValues[groupId]) childValues[groupId] = {};
+      childValues[groupId][element.name] = value;
     }
     else{
-      var name = element.name;
-      currentValues[element.id] = {name: element.name, value: element.value};
+      parentValues[element.name] = value;
     }
-    this.setState({values: currentValues});
-    this.props.currentState(currentValues);
-    //console.log(currentValues);
-         return false;
+   this.setState({parentValues: parentValues});
+   this.setState({childValues: childValues});
+   currentValues = parentValues;
+   currentValues['bullets'] = childValues;
+   console.log(JSON.stringify(parentValues));
+
+  return false;
   },
   handleSubmit: function() {
     this.props.submitState(this.state.values);
     return false;
   },
   getInitialState: function(){
-    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, values: []};
+    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, parentValues: {}, childValues: {}};
 
   },
   childElements: function(fixedProps,iteration,count,id,updateValues) {
@@ -50,6 +49,7 @@ var formjs = React.createClass({
         if(values[iteration]['bullets'][valueKey]){
           if(childId < amount) property.value = values[iteration]['bullets'][valueKey][property.title];
           if(childId >= amount && childId < stop) property.value = values[iteration]['bullets'][valueKey][property.title];
+          property.groupId = valueKey;
         }
       }
       childId++;
@@ -73,6 +73,7 @@ var formjs = React.createClass({
         updateValues = {updateValues}
         child        = "true"
         id           = {id}
+        groupId      = {property.groupId}
         childId      = {childId} />;
     });
     return childElements;
@@ -216,11 +217,11 @@ var generateField = React.createClass({
     return {value: this.props.value, name: name};
   },
   componentDidMount: function(){
-    this.props.updateValues({id: this.props.id, name: this.state.name, value: this.props.value,child: this.props.child,childId: this.props.childId, bulletId: this.props.bulletId});
+    this.props.updateValues({id: this.props.id, groupId: this.props.groupId, name: this.state.name, value: this.props.value,child: this.props.child,childId: this.props.childId, bulletId: this.props.bulletId});
   },
   handleChange: function(e) {
     var value = e.target.value;
-    this.props.updateValues({id: this.props.id, name: this.state.name, value: value,child: this.props.child, childId: this.props.childId, bulletId: this.props.bulletId});
+    this.props.updateValues({id: this.props.id, groupId: this.props.groupId, name: this.state.name, value: value,child: this.props.child, childId: this.props.childId, bulletId: this.props.bulletId});
     this.setState({value: value});
   },
   render: function(){
@@ -280,7 +281,7 @@ var generateField = React.createClass({
   }
 });
 var forms = [];
-for (var i = 0; i < 1; i++) {
+for (var i = 0; i < json.length; i++) {
     forms.push(<formjs data={json[i]} values={values[i]} number={i} submitState={submitState} currentState={currentState} />);
 }
 React.renderComponent(
