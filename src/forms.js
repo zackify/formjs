@@ -21,15 +21,13 @@ var formjs = React.createClass({
     }
    this.setState({parentValues: parentValues});
    this.setState({childValues: childValues});
-   currentValues = parentValues;
-   currentValues['bullets'] = childValues;
+   parentValues['bullets'] = childValues;
    this.props.currentState(JSON.stringify(parentValues));
 
   return false;
   },
   handleSubmit: function() {
     var currentValues = this.state.parentValues;
-    currentValues['childValues'] = this.state.childValues;
     this.props.submitState(JSON.stringify(currentValues));
     return false;
   },
@@ -55,9 +53,9 @@ var formjs = React.createClass({
         if(values[iteration]['bullets'][valueKey]){
           if(childId < amount) property.value = values[iteration]['bullets'][valueKey][property.title];
           if(childId >= amount && childId < stop) property.value = values[iteration]['bullets'][valueKey][property.title];
-          property.groupId = valueKey;
         }
       }
+      property.groupId = valueKey;
       childId++;
       check++;
       var fieldType = "text";
@@ -66,6 +64,7 @@ var formjs = React.createClass({
       if (!property.title) property.title = name;
       if(property.enum && property.enum.length > 2) fieldType = "select";
       if(property.enum && property.enum.length == 2) fieldType = "radio";
+      if (property['ux-widget']) fieldType = property['ux-widget'];
       return <generateField 
         type         = {fieldType}
         items        = {property.enum}
@@ -139,13 +138,16 @@ var formjs = React.createClass({
 
           if(property.enum && property.enum.length > 2) fieldType = "select";
           if(property.enum && property.enum.length == 2) fieldType = "radio";
+          if (property['ux-widget']) fieldType = property['ux-widget'];
+          var value = "";
+          if(values[iteration]) value = values[iteration][name];
           return <generateField 
           type         = {fieldType} 
           items        = {property.enum}
           label        = {property.title} 
           name         = {name} 
           placeholder  = {property['ux-placeholder']} 
-          value        = {values[name]}
+          value        = {value}
           required     = {property.required}
           description  = {property.description}
           updateValues = {updateValues}
@@ -186,6 +188,7 @@ var addField = React.createClass({
       if (!property.title) property.title = name;
       if(property.enum && property.enum.length > 2) fieldType = "select";
       if(property.enum && property.enum.length == 2) fieldType = "radio";
+      if (property['ux-widget']) fieldType = property['ux-widget'];
       bulletId++;
       return <generateField 
       type         = {fieldType} 
@@ -193,7 +196,6 @@ var addField = React.createClass({
       label        = {property.title} 
       name         = {name} 
       placeholder  = {property['ux-placeholder']} 
-      value        = {values[name]}
       required     = {property.required}
       updateValues = {updateValues}
       description  = {property.description}
@@ -249,7 +251,7 @@ var generateField = React.createClass({
         </div>
       );
     }
-    if(this.props.type == "radio"){
+    else if(this.props.type == "radio"){
       if(this.props.value == this.props.items[0]) var selectedFirst = "checked";
       if(this.props.value == this.props.items[1]) var selectedSecond = "checked";
       return(
@@ -270,6 +272,15 @@ var generateField = React.createClass({
         name        = {this.props.name}
         checked     = {selectedSecond}
         onChange    = {this.handleChange}/>
+        </div>
+      );
+    }
+    else if(this.props.type == "textarea"){
+      return(
+        <div className="element textarea">
+        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
+        <label>{this.props.label}</label>
+        <textarea required={this.props.required} onChange={this.handleChange}>{this.state.value}</textarea>
         </div>
       );
     }
