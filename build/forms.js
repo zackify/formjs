@@ -2,14 +2,16 @@
 //form.js
 
 var CreateFieldsMixin = {
-  generateComponent: function(property,name,updateValues,id,childId,child){
+  generateComponent: function(property,name,updateValues,id,childId,child,bulletId,bulletGroup){
       var fieldType = "text";
+      var value = property.value;
       if (property.type == "number") fieldType = "number";
       if (property.format) fieldType = property.format;
       if (!property.title) property.title = name;
       if(property.enum && property.enum.length > 2) fieldType = "select";
       if(property.enum && property.enum.length == 2) fieldType = "radio";
       if (property['ux-widget']) fieldType = property['ux-widget'];
+      if(bulletId >= 0) value = "";
       return generateField( 
         {type:          fieldType,
         items:         property.enum,
@@ -17,14 +19,16 @@ var CreateFieldsMixin = {
         label:         property.title, 
         name:          name, 
         placeholder:   property['ux-placeholder'], 
-        value:         property.value,
+        value:         value,
         required:      property.required,
         description:   property.description,
         updateValues:  updateValues,
         child:         child,
         id:            id,
         groupId:       property.groupId,
-        childId:       childId} );
+        childId:       childId, 
+        bulletId:      bulletId,
+        bulletGroup:   bulletGroup} );
 
   }
 };
@@ -163,6 +167,7 @@ var formjs = React.createClass({displayName: 'formjs',
   }
 });
 var addField = React.createClass({displayName: 'addField',
+  mixins: [CreateFieldsMixin],
  getInitialState: function() {
     return {fields: this.props.fields, generatedFields: [], bulletGroup: this.props.id};
   },
@@ -170,27 +175,9 @@ var addField = React.createClass({displayName: 'addField',
     var bulletId = this.state.generatedFields.length * this.props.fieldCount;
     var updateValues = this.props.updateValues;
     var id = this.props.id;
+    var generateComponent = this.generateComponent;
     var generatedFields = _.map(fields, function (property,name) {
-      var fieldType = "text";
-      if (property.type == "number") fieldType = "number";
-      if (property.format) fieldType = property.format;
-      if (!property.title) property.title = name;
-      if(property.enum && property.enum.length > 2) fieldType = "select";
-      if(property.enum && property.enum.length == 2) fieldType = "radio";
-      if (property['ux-widget']) fieldType = property['ux-widget'];
-      bulletId++;
-      return generateField( 
-      {type:          fieldType, 
-      items:         property.enum,
-      label:         property.title, 
-      name:          name, 
-      placeholder:   property['ux-placeholder'], 
-      required:      property.required,
-      updateValues:  updateValues,
-      description:   property.description,
-      id:            id,
-      bulletId:      bulletId,
-      bulletGroup:   bulletGroup} );
+       return generateComponent(property,name,updateValues,id,null,null,bulletId,bulletGroup);
     });
   return generatedFields;
   },
