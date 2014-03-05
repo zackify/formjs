@@ -1,6 +1,35 @@
 /** @jsx React.DOM */
 //form.js
+
+var CreateFieldsMixin = {
+  generateComponent: function(property,name,updateValues,id,childId,child){
+      var fieldType = "text";
+      if (property.type == "number") fieldType = "number";
+      if (property.format) fieldType = property.format;
+      if (!property.title) property.title = name;
+      if(property.enum && property.enum.length > 2) fieldType = "select";
+      if(property.enum && property.enum.length == 2) fieldType = "radio";
+      if (property['ux-widget']) fieldType = property['ux-widget'];
+      return generateField( 
+        {type:          fieldType,
+        items:         property.enum,
+        values:        values.bullets,
+        label:         property.title, 
+        name:          name, 
+        placeholder:   property['ux-placeholder'], 
+        value:         property.value,
+        required:      property.required,
+        description:   property.description,
+        updateValues:  updateValues,
+        child:         child,
+        id:            id,
+        groupId:       property.groupId,
+        childId:       childId} );
+
+  }
+};
 var formjs = React.createClass({displayName: 'formjs',
+  mixins: [CreateFieldsMixin],
   updateValues: function(element){
     var currentValues = {};
     var parentValues = this.state.parentValues;
@@ -35,16 +64,15 @@ var formjs = React.createClass({displayName: 'formjs',
     return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, parentValues: {}, childValues: {}};
 
   },
-  childElements: function(fixedProps,iteration,count,id,updateValues) {
-    var stop = 0;
-    var check = 0;
-    var valueKey = 0;
+  generateChildComponent: function(fixedProps,iteration,count,id,updateValues) {
+    var stop, check, valueKey, childId;
+    stop = check = valueKey = childId = 0;
     var amount = count;
-    var childId = 0;
+    var generateComponent = this.generateComponent;
     var childElements = _.map(fixedProps, function (property,name) {
       property.value = '';
       if(check == count){
-        if(childId != 3) amount = amount + count;
+        if(childId != 3) amount += count;
         stop = amount + count;
         check = 0;
         valueKey++;
@@ -58,28 +86,7 @@ var formjs = React.createClass({displayName: 'formjs',
       property.groupId = valueKey;
       childId++;
       check++;
-      var fieldType = "text";
-      if (property.type == "number") fieldType = "number";
-      if (property.format) fieldType = property.format;
-      if (!property.title) property.title = name;
-      if(property.enum && property.enum.length > 2) fieldType = "select";
-      if(property.enum && property.enum.length == 2) fieldType = "radio";
-      if (property['ux-widget']) fieldType = property['ux-widget'];
-      return generateField( 
-        {type:          fieldType,
-        items:         property.enum,
-        values:        values.bullets,
-        label:         property.title, 
-        name:          name, 
-        placeholder:   property['ux-placeholder'], 
-        value:         property.value,
-        required:      property.required,
-        description:   property.description,
-        updateValues:  updateValues,
-        child:         "true",
-        id:            id,
-        groupId:       property.groupId,
-        childId:       childId} );
+      return generateComponent(property,name,updateValues,id,childId,"true");
     });
     return childElements;
   },
@@ -87,7 +94,8 @@ var formjs = React.createClass({displayName: 'formjs',
     var updateValues = this.updateValues;
     var id = 0;
     var iteration = this.state.iteration;
-    var generateElements = this.childElements;
+    var generateChildComponent = this.generateChildComponent;
+    var generateComponent = this.generateComponent
     var elements = _.map(this.state.properties, function (property,name) {
       id++;
       if(property.type == "array"){
@@ -121,7 +129,7 @@ var formjs = React.createClass({displayName: 'formjs',
             }
             arrayNum++;
           }
-          var childElements = generateElements(fixedProps,iteration,count,id,updateValues);
+          var childElements =  generateChildComponent(fixedProps,iteration,count,id,updateValues);
           return React.DOM.div( {className:"child"}, 
           React.DOM.p(null, property.title),
           childElements,
@@ -130,28 +138,10 @@ var formjs = React.createClass({displayName: 'formjs',
         }
       }
       else{
-        if(property.type == "string" || property.type == "number"){
-          var fieldType = "text";
-          if (property.type == "number") fieldType = "number";
-          if (property.format) fieldType = property.format;
-          if (!property.title) property.title = name;
-
-          if(property.enum && property.enum.length > 2) fieldType = "select";
-          if(property.enum && property.enum.length == 2) fieldType = "radio";
-          if (property['ux-widget']) fieldType = property['ux-widget'];
-          var value = "";
-          if(values[iteration]) value = values[iteration][name];
-          return generateField( 
-          {type:          fieldType, 
-          items:         property.enum,
-          label:         property.title, 
-          name:          name, 
-          placeholder:   property['ux-placeholder'], 
-          value:         value,
-          required:      property.required,
-          description:   property.description,
-          updateValues:  updateValues,
-          id:            id} );
+        if(property.type == "string" || property.type == "number"){ // add boolean fields
+          property.value = "";
+          if(values[iteration]) property.value = values[iteration][name];
+          return generateComponent(property,name,updateValues,id);
         }
       }
     });
@@ -172,7 +162,6 @@ var formjs = React.createClass({displayName: 'formjs',
     
   }
 });
-
 var addField = React.createClass({displayName: 'addField',
  getInitialState: function() {
     return {fields: this.props.fields, generatedFields: [], bulletGroup: this.props.id};
@@ -301,7 +290,7 @@ var generateField = React.createClass({displayName: 'generateField',
 });
 var forms = [];
 for (var i = 0; i < schema.length; i++) {
-    forms.push(formjs( {data:schema[i], values:values[i], number:i, submitState:submitState, currentState:currentState} ));
+    forms.push(formjs( {data:schema[i], number:i, submitState:submitState, currentState:currentState} ));
 }
 React.renderComponent(
   React.DOM.div(null, forms),
