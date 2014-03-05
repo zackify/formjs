@@ -43,19 +43,17 @@ var formjs = React.createClass({displayName: 'formjs',
     var currentValues = {};
     var parentValues = this.state.parentValues;
     var childValues = this.state.childValues;
-    var groupId = element.groupId;
-    var value = element.value;
-    if(!value) value = '';
+    if(!element.value) element.value = '';
     if(element.bulletGroup){
       if(!childValues[element.bulletGroup]) childValues[element.bulletGroup] = {};
-      childValues[element.bulletGroup][element.name] = value;
+      childValues[element.bulletGroup][element.name] = element.value;
     }
     else if(element.child){
-      if(!childValues[groupId]) childValues[groupId] = {};
-      childValues[groupId][element.name] = value;
+      if(!childValues[element.groupId]) childValues[element.groupId] = {};
+      childValues[element.groupId][element.name] = element.value;
     }
     else{
-      parentValues[element.name] = value;
+      parentValues[element.name] = element.value;
     }
    this.setState({parentValues: parentValues});
    this.setState({childValues: childValues});
@@ -217,87 +215,155 @@ var generateField = React.createClass({displayName: 'generateField',
   },
   render: function(){
     if(this.props.type == "select"){
-      var name = this.props.name;
-      var selected = '';
-      var options = this.props.items.map(function (option) {
-        return  React.DOM.option( {value:option}, option)
-      });
       return(
-        React.DOM.div( {className:"element select"}, 
-        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
-        React.DOM.label(null, this.props.label),
-        React.DOM.select( {value:this.props.value, onChange:this.handleChange}, 
-        options
-        )
-        )
+        selectField( {label:  this.props.label, 
+        description:  this.props.description, 
+        name:         this.props.name, 
+        items:        this.props.items,
+        value:        this.props.value, 
+        change:       this.handleChange} )
       );
     }
     else if(this.props.type == "radio"){
-      if(this.state.value == this.props.items[0]) var selectedFirst = "checked";
-      if(this.state.value == this.props.items[1]) var selectedSecond = "checked";
       return(
-        React.DOM.div( {className:"element radio"}, 
-        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
-        React.DOM.label(null, this.props.label),React.DOM.br(null ),
-        React.DOM.label(null, this.props.items[0]),
-        React.DOM.input( {type:  this.props.type,
-        value:        this.props.items[0],
-        required:     this.props.required,
-        name:         this.props.name,
-        checked:      selectedFirst,
-        onChange:     this.handleChange}),
-        React.DOM.label(null, this.props.items[1]),
-        React.DOM.input( {type:  this.props.type,
-        value:        this.props.items[1],
-        required:     this.props.required,
-        name:         this.props.name,
-        checked:      selectedSecond,
-        onChange:     this.handleChange})
-        )
+        radioField( {type:  this.props.type,
+        label:           this.props.label,
+        description:     this.props.description,
+        value:           this.state.value,
+        required:        this.props.required,
+        name:            this.props.name,
+        change:          this.handleChange,
+        items:           this.props.items} )
       );
     }
     else if(this.props.type == "textarea"){
       return(
-        React.DOM.div( {className:"element textarea"}, 
-        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
-        React.DOM.label(null, this.props.label),
-        React.DOM.textarea( {required:this.props.required, onChange:this.handleChange}, this.state.value)
-        )
+        textareaField( 
+        {label:        this.props.label,
+        required:     this.props.required, 
+        change:       this.handleChange,
+        value:        this.state.value, 
+        description:  this.props.description} )
       );
     }
     else if (this.props.type == "checkbox"){
-      var checked = false;
-      if(this.state.value === true) checked = 'checked';
       return(
-        React.DOM.div( {className:"element checkbox"}, 
-        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
-        React.DOM.label(null, this.props.label),
-        React.DOM.input( {type:  this.props.type,
-        required:     this.props.required,
+        checkboxField( {description:  this.props.description,
+        label:        this.props.label,
         value:        this.state.value,
-        checked:      checked,
-        onChange:     this.handleChange})
-        )
+        required:     this.props.required,
+        change:       this.handleChange} )
       );
     }
     else{
       return(
-        React.DOM.div( {className:"element inputfield"}, 
-        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
-        React.DOM.label(null, this.props.label),
-        React.DOM.input( {type:  this.props.type,
+        genericField( {type:  this.props.type,
+        description:  this.props.description,
+        label:        this.props.label,
         placeholder:  this.props.placeholder,
         value:        this.state.value,
         required:     this.props.required,
         min:          this.props.minimum,
         max:          this.props.maximum,
         step:         this.props.step,
-        onChange:     this.handleChange})
-        )
+        change:       this.handleChange})
       );
     }
   }
 });
+
+var genericField = React.createClass({displayName: 'genericField',
+  render: function(){
+    return(
+      React.DOM.div( {className:"element inputfield"}, 
+        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
+        React.DOM.label(null, this.props.label),
+        React.DOM.input( {type:  this.props.type,
+        placeholder:  this.props.placeholder,
+        value:        this.props.value,
+        required:     this.props.required,
+        min:          this.props.minimum,
+        max:          this.props.maximum,
+        step:         this.props.step,
+        onChange:     this.props.change})
+      )
+    );
+  }
+});
+
+var checkboxField = React.createClass({displayName: 'checkboxField',
+  render: function(){
+    var checked = false;
+    if(this.props.value === true) checked = 'checked';
+    return(
+      React.DOM.div( {className:"element checkbox"}, 
+        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
+        React.DOM.label(null, this.props.label),
+        React.DOM.input( {type:  "checkbox",
+        required:     this.props.required,
+        value:        this.props.value,
+        checked:      checked,
+        onChange:     this.props.change})
+      )
+    );
+  }
+});
+
+var radioField = React.createClass({displayName: 'radioField',
+  render: function(){
+    if(this.props.value == this.props.items[0]) var selectedFirst = "checked";
+    if(this.props.value == this.props.items[1]) var selectedSecond = "checked";
+    return(
+      React.DOM.div( {className:"element radio"}, 
+        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
+        React.DOM.label(null, this.props.label),React.DOM.br(null ),
+        React.DOM.label(null, this.props.items[0]),
+        React.DOM.input( {type:  "radio",
+        value:        this.props.items[0],
+        required:     this.props.required,
+        name:         this.props.name,
+        checked:      selectedFirst,
+        onChange:     this.props.change}),
+        React.DOM.label(null, this.props.items[1]),
+        React.DOM.input( {type:  "radio",
+        value:        this.props.items[1],
+        required:     this.props.required,
+        name:         this.props.name,
+        checked:      selectedSecond,
+        onChange:     this.props.change})
+      )
+    );
+  }
+});
+var textareaField = React.createClass({displayName: 'textareaField',
+  render: function(){
+    return(
+      React.DOM.div( {className:"element textarea"}, 
+        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
+        React.DOM.label(null, this.props.label),
+        React.DOM.textarea( {required:this.props.required, onChange:this.props.change}, this.props.value)
+      )
+    );
+  }
+});
+
+var selectField = React.createClass({displayName: 'selectField',
+  render: function(){
+      var options = this.props.items.map(function (option) {
+        return  React.DOM.option( {value:option}, option)
+      });
+      return(
+        React.DOM.div( {className:"element select"}, 
+          React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
+          React.DOM.label(null, this.props.label),
+          React.DOM.select( {value:this.props.value, onChange:this.props.change}, 
+          options
+          )
+        )
+      );
+  }
+});
+
 var forms = [];
 for (var i = 0; i < schema.length; i++) {
     forms.push(formjs( {data:schema[i], number:i, submitState:submitState, currentState:currentState} ));

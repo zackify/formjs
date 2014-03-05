@@ -43,19 +43,17 @@ var formjs = React.createClass({
     var currentValues = {};
     var parentValues = this.state.parentValues;
     var childValues = this.state.childValues;
-    var groupId = element.groupId;
-    var value = element.value;
-    if(!value) value = '';
+    if(!element.value) element.value = '';
     if(element.bulletGroup){
       if(!childValues[element.bulletGroup]) childValues[element.bulletGroup] = {};
-      childValues[element.bulletGroup][element.name] = value;
+      childValues[element.bulletGroup][element.name] = element.value;
     }
     else if(element.child){
-      if(!childValues[groupId]) childValues[groupId] = {};
-      childValues[groupId][element.name] = value;
+      if(!childValues[element.groupId]) childValues[element.groupId] = {};
+      childValues[element.groupId][element.name] = element.value;
     }
     else{
-      parentValues[element.name] = value;
+      parentValues[element.name] = element.value;
     }
    this.setState({parentValues: parentValues});
    this.setState({childValues: childValues});
@@ -217,87 +215,155 @@ var generateField = React.createClass({
   },
   render: function(){
     if(this.props.type == "select"){
-      var name = this.props.name;
-      var selected = '';
-      var options = this.props.items.map(function (option) {
-        return  <option value={option}>{option}</option>
-      });
       return(
-        <div className="element select">
-        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
-        <label>{this.props.label}</label>
-        <select value={this.props.value} onChange={this.handleChange}>
-        {options}
-        </select>
-        </div>
+        <selectField label = {this.props.label} 
+        description = {this.props.description} 
+        name        = {this.props.name} 
+        items       = {this.props.items}
+        value       = {this.props.value} 
+        change      = {this.handleChange} />
       );
     }
     else if(this.props.type == "radio"){
-      if(this.state.value == this.props.items[0]) var selectedFirst = "checked";
-      if(this.state.value == this.props.items[1]) var selectedSecond = "checked";
       return(
-        <div className="element radio">
-        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
-        <label>{this.props.label}</label><br />
-        <label>{this.props.items[0]}</label>
-        <input type = {this.props.type}
-        value       = {this.props.items[0]}
-        required    = {this.props.required}
-        name        = {this.props.name}
-        checked     = {selectedFirst}
-        onChange    = {this.handleChange}/>
-        <label>{this.props.items[1]}</label>
-        <input type = {this.props.type}
-        value       = {this.props.items[1]}
-        required    = {this.props.required}
-        name        = {this.props.name}
-        checked     = {selectedSecond}
-        onChange    = {this.handleChange}/>
-        </div>
+        <radioField type = {this.props.type}
+        label          = {this.props.label}
+        description    = {this.props.description}
+        value          = {this.state.value}
+        required       = {this.props.required}
+        name           = {this.props.name}
+        change         = {this.handleChange}
+        items          = {this.props.items} />
       );
     }
     else if(this.props.type == "textarea"){
       return(
-        <div className="element textarea">
-        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
-        <label>{this.props.label}</label>
-        <textarea required={this.props.required} onChange={this.handleChange}>{this.state.value}</textarea>
-        </div>
+        <textareaField 
+        label       = {this.props.label}
+        required    = {this.props.required} 
+        change      = {this.handleChange}
+        value       = {this.state.value} 
+        description = {this.props.description} />
       );
     }
     else if (this.props.type == "checkbox"){
-      var checked = false;
-      if(this.state.value === true) checked = 'checked';
       return(
-        <div className="element checkbox">
-        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
-        <label>{this.props.label}</label>
-        <input type = {this.props.type}
-        required    = {this.props.required}
+        <checkboxField description = {this.props.description}
+        label       = {this.props.label}
         value       = {this.state.value}
-        checked     = {checked}
-        onChange    = {this.handleChange}/>
-        </div>
+        required    = {this.props.required}
+        change      = {this.handleChange} />
       );
     }
     else{
       return(
-        <div className="element inputfield">
-        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
-        <label>{this.props.label}</label>
-        <input type = {this.props.type}
+        <genericField type = {this.props.type}
+        description = {this.props.description}
+        label       = {this.props.label}
         placeholder = {this.props.placeholder}
         value       = {this.state.value}
         required    = {this.props.required}
         min         = {this.props.minimum}
         max         = {this.props.maximum}
         step        = {this.props.step}
-        onChange    = {this.handleChange}/>
-        </div>
+        change      = {this.handleChange}/>
       );
     }
   }
 });
+
+var genericField = React.createClass({
+  render: function(){
+    return(
+      <div className="element inputfield">
+        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
+        <label>{this.props.label}</label>
+        <input type = {this.props.type}
+        placeholder = {this.props.placeholder}
+        value       = {this.props.value}
+        required    = {this.props.required}
+        min         = {this.props.minimum}
+        max         = {this.props.maximum}
+        step        = {this.props.step}
+        onChange    = {this.props.change}/>
+      </div>
+    );
+  }
+});
+
+var checkboxField = React.createClass({
+  render: function(){
+    var checked = false;
+    if(this.props.value === true) checked = 'checked';
+    return(
+      <div className="element checkbox">
+        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
+        <label>{this.props.label}</label>
+        <input type = 'checkbox'
+        required    = {this.props.required}
+        value       = {this.props.value}
+        checked     = {checked}
+        onChange    = {this.props.change}/>
+      </div>
+    );
+  }
+});
+
+var radioField = React.createClass({
+  render: function(){
+    if(this.props.value == this.props.items[0]) var selectedFirst = "checked";
+    if(this.props.value == this.props.items[1]) var selectedSecond = "checked";
+    return(
+      <div className="element radio">
+        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
+        <label>{this.props.label}</label><br />
+        <label>{this.props.items[0]}</label>
+        <input type = 'radio'
+        value       = {this.props.items[0]}
+        required    = {this.props.required}
+        name        = {this.props.name}
+        checked     = {selectedFirst}
+        onChange    = {this.props.change}/>
+        <label>{this.props.items[1]}</label>
+        <input type = 'radio'
+        value       = {this.props.items[1]}
+        required    = {this.props.required}
+        name        = {this.props.name}
+        checked     = {selectedSecond}
+        onChange    = {this.props.change}/>
+      </div>
+    );
+  }
+});
+var textareaField = React.createClass({
+  render: function(){
+    return(
+      <div className="element textarea">
+        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
+        <label>{this.props.label}</label>
+        <textarea required={this.props.required} onChange={this.props.change}>{this.props.value}</textarea>
+      </div>
+    );
+  }
+});
+
+var selectField = React.createClass({
+  render: function(){
+      var options = this.props.items.map(function (option) {
+        return  <option value={option}>{option}</option>
+      });
+      return(
+        <div className="element select">
+          <p dangerouslySetInnerHTML={{__html: this.props.description}} />
+          <label>{this.props.label}</label>
+          <select value={this.props.value} onChange={this.props.change}>
+          {options}
+          </select>
+        </div>
+      );
+  }
+});
+
 var forms = [];
 for (var i = 0; i < schema.length; i++) {
     forms.push(<formjs data={schema[i]} number={i} submitState={submitState} currentState={currentState} />);
