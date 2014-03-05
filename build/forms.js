@@ -5,7 +5,9 @@ var CreateFieldsMixin = {
   generateComponent: function(property,name,updateValues,id,childId,child,bulletId,bulletGroup){
       var fieldType = "text";
       var value = property.value;
-      if (property.type == "number") fieldType = "number";
+      if (property.type == "number" || property.type == "integer") fieldType = "number";
+      if (property.type == "boolean") fieldType = "checkbox";
+      if(property.type == "boolean" && value == '') value = false;
       if (property.format) fieldType = property.format;
       if (!property.title) property.title = name;
       if(property.enum && property.enum.length > 2) fieldType = "select";
@@ -28,7 +30,10 @@ var CreateFieldsMixin = {
         groupId:       property.groupId,
         childId:       childId, 
         bulletId:      bulletId,
-        bulletGroup:   bulletGroup} );
+        bulletGroup:   bulletGroup,
+        minimum:       property.minimum,
+        maximum:       property.maximum,
+        step:          property.step} );
 
   }
 };
@@ -137,16 +142,14 @@ var formjs = React.createClass({displayName: 'formjs',
           return React.DOM.div( {className:"child"}, 
           React.DOM.p(null, property.title),
           childElements,
-          addField( {fields:property.items.properties, updateValues:updateValues, id:id, fieldCount:count} )
+          addField( {fields:property.items.properties, updateValues:updateValues, fieldCount:count} )
           );
         }
       }
       else{
-        if(property.type == "string" || property.type == "number"){ // add boolean fields
           property.value = "";
           if(values[iteration]) property.value = values[iteration][name];
           return generateComponent(property,name,updateValues,id);
-        }
       }
     });
     var formDescription;
@@ -169,7 +172,7 @@ var formjs = React.createClass({displayName: 'formjs',
 var addField = React.createClass({displayName: 'addField',
   mixins: [CreateFieldsMixin],
  getInitialState: function() {
-    return {fields: this.props.fields, generatedFields: [], bulletGroup: this.props.id};
+    return {fields: this.props.fields, generatedFields: [], bulletGroup: this.props.fieldCount};
   },
   generateFields: function(fields,bulletGroup){
     var bulletId = this.state.generatedFields.length * this.props.fieldCount;
@@ -207,6 +210,8 @@ var generateField = React.createClass({displayName: 'generateField',
   },
   handleChange: function(e) {
     var value = e.target.value;
+    if(this.state.value === true)  value = false;
+    if(this.state.value === false) value = true;
     this.props.updateValues({id: this.props.id, groupId: this.props.groupId, bulletGroup: this.props.bulletGroup, name: this.state.name, value: value,child: this.props.child, childId: this.props.childId, bulletId: this.props.bulletId});
     this.setState({value: value});
   },
@@ -228,8 +233,8 @@ var generateField = React.createClass({displayName: 'generateField',
       );
     }
     else if(this.props.type == "radio"){
-      if(this.props.value == this.props.items[0]) var selectedFirst = "checked";
-      if(this.props.value == this.props.items[1]) var selectedSecond = "checked";
+      if(this.state.value == this.props.items[0]) var selectedFirst = "checked";
+      if(this.state.value == this.props.items[1]) var selectedSecond = "checked";
       return(
         React.DOM.div( {className:"element radio"}, 
         React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
@@ -260,15 +265,33 @@ var generateField = React.createClass({displayName: 'generateField',
         )
       );
     }
+    else if (this.props.type == "checkbox"){
+      var checked = false;
+      if(this.state.value === true) checked = 'checked';
+      return(
+        React.DOM.div( {className:"element checkbox"}, 
+        React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
+        React.DOM.label(null, this.props.label),
+        React.DOM.input( {type:  this.props.type,
+        required:     this.props.required,
+        value:        this.state.value,
+        checked:      checked,
+        onChange:     this.handleChange})
+        )
+      );
+    }
     else{
       return(
-        React.DOM.div( {className:"element textfield"}, 
+        React.DOM.div( {className:"element inputfield"}, 
         React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
         React.DOM.label(null, this.props.label),
         React.DOM.input( {type:  this.props.type,
         placeholder:  this.props.placeholder,
         value:        this.state.value,
         required:     this.props.required,
+        min:          this.props.minimum,
+        max:          this.props.maximum,
+        step:         this.props.step,
         onChange:     this.handleChange})
         )
       );
