@@ -6,15 +6,22 @@ var CreateFieldsMixin = {
       var fieldType = "text";
       var value = property.value;
       if (property.type == "number" || property.type == "integer") fieldType = "number";
-      if (property.type == "boolean") fieldType = "checkbox";
-      if(property.type == "boolean" && value == '') value = false;
-      if (property.format) fieldType = property.format;
-      if (!property.title) property.title = name;
-      if(property.enum && property.enum.length > 2) fieldType = "select";
-      if(property.enum && property.enum.length == 2) fieldType = "radio";
+      else if (property.type == "boolean"){
+        fieldType = "checkbox";
+        if(value == '') value = false;
+      }
       if (property['ux-widget']) fieldType = property['ux-widget'];
+      if (property.format){
+        fieldType = property.format;
+        if(property.format == "uri") fieldType = "file";
+      }
+      if(property.enum){
+        if(property.enum.length > 2) fieldType = "select";
+        if(property.enum.length == 2) fieldType = "radio";
+      }
+      if (!property.title) property.title = name;
       if(bulletId >= 0) value = "";
-      return generateField( 
+      return generateField(
         {type:          fieldType,
         items:         property.enum,
         values:        values.bullets,
@@ -33,8 +40,12 @@ var CreateFieldsMixin = {
         bulletGroup:   bulletGroup,
         minimum:       property.minimum,
         maximum:       property.maximum,
-        step:          property.step} );
+        step:          property.step,
+        fileUpload:    this.fileUpload} );
 
+  },
+  fileUpload: function(files){
+    this.props.fileUpload(files);
   }
 };
 var formjs = React.createClass({displayName: 'formjs',
@@ -208,8 +219,11 @@ var generateField = React.createClass({displayName: 'generateField',
   },
   handleChange: function(e) {
     var value = e.target.value;
-    if(this.state.value === true)  value = false;
-    if(this.state.value === false) value = true;
+    if(e.target.files) this.props.fileUpload(e.target.files);
+    else{
+      if(this.state.value === true)  value = false;
+      if(this.state.value === false) value = true;
+    }
     this.props.updateValues({id: this.props.id, groupId: this.props.groupId, bulletGroup: this.props.bulletGroup, name: this.state.name, value: value,child: this.props.child, childId: this.props.childId, bulletId: this.props.bulletId});
     this.setState({value: value});
   },
@@ -366,7 +380,7 @@ var selectField = React.createClass({displayName: 'selectField',
 
 var forms = [];
 for (var i = 0; i < schema.length; i++) {
-    forms.push(formjs( {data:schema[i], number:i, submitState:submitState, currentState:currentState} ));
+    forms.push(formjs( {data:schema[i], number:i, submitState:formjsSubmit, fileUpload:formjsUpload, currentState:formjsCurrent} ));
 }
 React.renderComponent(
   React.DOM.div(null, forms),
