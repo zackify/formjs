@@ -70,9 +70,10 @@ var formjs = React.createClass({displayName: 'formjs',
    this.setState({parentValues: parentValues});
    this.setState({childValues: childValues});
    parentValues['bullets'] = childValues;
+   if(element.initial === true) return false;
    this.props.currentState(JSON.stringify(parentValues));
 
-  return false;
+   return false;
   },
   handleSubmit: function() {
     var currentValues = this.state.parentValues;
@@ -111,19 +112,18 @@ var formjs = React.createClass({displayName: 'formjs',
     return childElements;
   },
   render: function() {
-    var updateValues = this.updateValues;
     var id = 0;
-    var iteration = this.state.iteration;
+    var updateValues = this.updateValues;
+    var iteration    = this.state.iteration;
     var generateChildComponent = this.generateChildComponent;
-    var generateComponent = this.generateComponent
+    var generateComponent      = this.generateComponent
     var elements = _.map(this.state.properties, function (property,name) {
       id++;
       if(property.type == "array"){
         if(property.items.properties){
           var fixedProps = {};
-          var i = 0;
-          var count= 0;
-          var bulletCount = 0;
+          var i, count, bulletCount;
+          i = count = bulletCount = 0;
           for(var prop in property.items.properties) {
             if(property.items.properties.hasOwnProperty(prop))
             ++count;
@@ -217,7 +217,7 @@ var generateField = React.createClass({displayName: 'generateField',
     return {value: this.props.value, name: name};
   },
   componentDidMount: function(){
-    this.props.updateValues({id: this.props.id, groupId: this.props.groupId, bulletGroup: this.props.bulletGroup, name: this.state.name, value: this.props.value,child: this.props.child,childId: this.props.childId, bulletId: this.props.bulletId});
+    this.props.updateValues({initial: true, id: this.props.id, groupId: this.props.groupId, bulletGroup: this.props.bulletGroup, name: this.state.name, value: this.props.value,child: this.props.child,childId: this.props.childId, bulletId: this.props.bulletId});
   },
   handleChange: function(e) {
     var value = e.target.value;
