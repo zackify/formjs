@@ -45,7 +45,8 @@ var CreateFieldsMixin = {
 
   },
   fileUpload: function(files){
-    this.props.fileUpload(files);
+    this.props.filesOnSelect(files);
+    this.state.files.push(files);
   }
 };
 var formjs = React.createClass({
@@ -76,10 +77,11 @@ var formjs = React.createClass({
   handleSubmit: function() {
     var currentValues = this.state.parentValues;
     this.props.submitState(JSON.stringify(currentValues));
+    if(this.state.files) this.props.filesOnSubmit(this.state.files);
     return false;
   },
   getInitialState: function(){
-    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, parentValues: {}, childValues: {}};
+    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, parentValues: {}, childValues: {}, files: []};
 
   },
   generateChildComponent: function(fixedProps,iteration,count,id,updateValues) {
@@ -380,7 +382,7 @@ var selectField = React.createClass({
 
 var forms = [];
 for (var i = 0; i < schema.length; i++) {
-    forms.push(<formjs data={schema[i]} number={i} submitState={formjsSubmit} fileUpload={formjsUpload} currentState={formjsCurrent} />);
+    forms.push(<formjs data={schema[i]} number={i} submitState={formjsSubmit} filesOnSubmit={formjsFilesOnSubmit} filesOnSelect={formjsFilesOnSelect} currentState={formjsCurrent} />);
 }
 React.renderComponent(
   <div>{forms}</div>,
