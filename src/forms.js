@@ -77,7 +77,7 @@ var formjs = React.createClass({
   handleSubmit: function() {
     var currentValues = this.state.parentValues;
     this.props.submitState(JSON.stringify(currentValues));
-    if(this.state.files) this.props.filesOnSubmit(this.state.files);
+    if(this.state.files != '') this.props.filesOnSubmit(this.state.files);
     return false;
   },
   getInitialState: function(){
