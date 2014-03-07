@@ -77,6 +77,14 @@ var formjs = React.createClass({displayName: 'formjs',
 
    return false;
   },
+  getValues: function() {
+    var parentValues = this.state.parentValues;
+    parentValues['bullets'] = this.state.childValues;
+    return parentValues;
+  },
+  getFiles: function() {
+    return this.state.files;
+  },
   handleSubmit: function() {
     var currentValues = this.state.parentValues;
     if(this.props.submitState) this.props.submitState(JSON.stringify(currentValues));

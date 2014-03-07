@@ -160,6 +160,10 @@ function formjsFilesOnSelect(data){
 ```
 The `formjsCurrent` function will be called as the user changes any form fields, and `formjsSubmit` will only be called once the submit button is pressed. This way, you can do whatever you want with your data. You'll recieve a json object that you can do whatever you want with. The last two are in case you want file uploads. In order to keep the library small, I don't handle uploads natively. With these functions you will get an array with each files object from your form.
 
+Custom Functions
+---
+Instead of listening to callbacks you can also call `forms[0].getValues()` and `forms[0].getFiles()` at any time. Change the array key to whichever form you want to access!
+
 Version
 ----
 - **March 6th:** the first actually usable version is here! Most form inputs work, you can extend by adding your own form components and send a pull request if you want to help!
