@@ -30,77 +30,28 @@ Passing Form Information
 
 All you need to do is create a new variable called *json*, but this can be changed.
 
-Here's an example way to pass the json schema data to formjs
+Here's an example of setting up formjs
 ```
-<script type="text/javascript">
-      var json = {
-        "description": null, 
-        "schema": {
-            "type": "object", 
-            "properties": {
-                "name": {
-                    "type": "string", 
-                    "description": "\n        Your Site Name will appear in the title bar of the browser. It tells\n        users and search engines what your site is about.\n    ", 
-                    "title": "Site name"
-                },  
-                "bullets": {
-                    "items": {
-                        "type": "object", 
-                        "properties": {
-                            "text": {
-                                "type": "string", 
-                                "description": null, 
-                                "title": "text"
-                            },
-                            "score": {
-                                "type": "number",
-                                "title": "score",
-                                "enum": [1.5, 5.5, 9.5]
-                            },
-                            "score2": {
-                                "type": "number",
-                                "title": "score2",
-                                "enum": [1.5, 5.5, 9.5]
-                            }
-                        }
-                    },
-                    "type": "array", 
-                        "description": "", 
-                        "title": "Bullets"
-                    }, 
-                "domain": {
-                    "type": "string", 
-                    "description": "html can go here", 
-                    "title": "Domain"
-                }, 
-                "google_analytics_id": {
-                    "type": "number", 
-                    "title": "google analytics",
-                    "ux-placeholder": "ex. 2342342"
-                }, 
-                "admin_email": {
-                    "type": "string",
-                    "format": "email",
-                    "ux-placeholder": "Email"
-                },
-                "slug": {
-                    "type": "string", 
-                    "description": "", 
-                    "title": "Subdomain"
-                }
-            }
-        }
-    };
-    </script>
+   <script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    function formjsCurrent(data){
+        console.log('current state');
+        console.log(data);
+    }
+    function formjsSubmit(data){
+        console.log('form submit');
+        console.log(data);
 
-```
-As you can see you can add a section called bullets. These will show as many times as there are fields. 
-If you have two bullet fields, it'll show twice. These are cool because an add button will be displayed below them. 
-The user can add as many of these as they need.
-You can also add values to fields as demonstrated below.
-
-```
-var values = [{
+    }
+    function formjsFilesOnSubmit(data){
+        console.log('files array on submit');
+        console.log(data);
+    }
+    function formjsFilesOnSelect(data){
+        console.log('files array on selecte');
+        console.log(data);
+    }
+    var values = [{
     "title": "Hello world",
     "bullets": [
         {
@@ -118,9 +69,76 @@ var values = [{
     "birthday": "1970-01-01",
     "email": "thedude@gmail.com"
 }];
+      var schema = [
+        {
+            "description": "Create A doo hicky", 
+            "schema": {
+                "type": "object", 
+                "properties": {
+                    "title": {
+                        "type": "string",  
+                        "title": "title"
+                    }, 
+                    "bullets": {
+                        "items": {
+                            "type": "object", 
+                            "properties": {
+                                "text": {
+                                    "type": "string", 
+                                    "description": null, 
+                                    "title": "text"
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "title": "score",
+                                    "enum": [1.5, 5.5, 9.5]
+                                }
 
+                            }
+                        }, 
+                        
+                        "type": "array", 
+                        "description": "", 
+                        "title": "Bullets"
+                    }, 
+                    "are_you_awesome": {
+                        "type": "boolean"
+                    },
+                    "chromosome_configuration": {
+                        "type": "string",
+                        "enum": ["male", "female"]
+                    },
+                    "age": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 150
+                    },
+                    "birthday": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                    }
+                }
+            }
+        }];
+
+var forms = [];
+for (var i = 0; i < schema.length; i++) {
+  forms.push(formjs( {data:schema[i], values: values[i], iteration:i, submitState:formjsSubmit, filesOnSubmit:formjsFilesOnSubmit, filesOnSelect:formjsFilesOnSelect, currentState:formjsCurrent} ));
+}
+React.renderComponent(
+  React.DOM.div(null, forms),
+  document.body
+);
+});
+    </script>
 
 ```
+formjs is super easy to setup. You can remove the callbacks you don't need inside of the for loop. Side note: if you didn't notice the reason for the loop, it's for rendering multiple forms just by adding another one to the schema. You can remove any callback you don't need here.
+
 Retrieving Form data
 --
 There's four awesome callback functions that you can make in order to recieve data from formjs. You can see them in the index.html file, but I'll put it here too:
