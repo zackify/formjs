@@ -9,10 +9,10 @@ Installation
 --------------
 The library itself is very simple. All you need to do is include it in your header along with the dependencies:
 ```
-<script src="build/react.min.js"></script>
+<script src="react.js"></script>
 <script src="underscore-min.js"></script>
 ```
-
+then include `<script src="build/forms.js"></script>` in your body
 Supported Form Elements and their Markup
 --
 Formjs is still a work in progress but should be completed before the end of February, then this section will be completed.
