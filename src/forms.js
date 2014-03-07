@@ -80,10 +80,10 @@ var formjs = React.createClass({
   getValues: function() {
     var parentValues = this.state.parentValues;
     parentValues['bullets'] = this.state.childValues;
-    return parentValues;
+    return JSON.stringify(parentValues);
   },
   getFiles: function() {
-    return this.state.files;
+    return JSON.stringify(this.state.files);
   },
   handleSubmit: function() {
     var currentValues = this.state.parentValues;
