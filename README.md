@@ -127,10 +127,10 @@ There's four awesome callback functions that you can make in order to recieve da
 
 ```
 function formjsCurrent(data){
-        console.log(data);
+    console.log(data);
 }
 function formjsSubmit(data){
-    //console.log(data);
+    console.log(data);
 }
 function formjsFilesOnSubmit(data){
     console.log(data);
