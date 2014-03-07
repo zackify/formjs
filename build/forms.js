@@ -289,6 +289,7 @@ var generateField = React.createClass({displayName: 'generateField',
 
 var genericField = React.createClass({displayName: 'genericField',
   render: function(){
+    console.log(this.props.minimum);
     return(
       React.DOM.div( {className:"element inputfield"}, 
         React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
@@ -380,8 +381,14 @@ var selectField = React.createClass({displayName: 'selectField',
 });
 
 var forms = [];
+if(!formjsSubmit) var formjsSubmit = null;
+if(!formjsFilesOnSubmit) var formjsFilesOnSubmit = null;
+if(!formjsFilesOnSelect) var formjsFilesOnSelect = null;
+if(!formjsCurrent) var formjsCurrent = null;
+if(!formjsFilesOnSelect) var formjsFilesOnSelect = null;
+
 for (var i = 0; i < schema.length; i++) {
-    forms.push(formjs( {data:schema[i], iteration:i, submitState:formjsSubmit, filesOnSubmit:formjsFilesOnSubmit, filesOnSelect:formjsFilesOnSelect, currentState:formjsCurrent} ));
+  forms.push(formjs( {data:schema[i], iteration:i, submitState:formjsSubmit, filesOnSubmit:formjsFilesOnSubmit, filesOnSelect:formjsFilesOnSelect, currentState:formjsCurrent} ));
 }
 React.renderComponent(
   React.DOM.div(null, forms),

@@ -5,18 +5,23 @@
     <script src="underscore-min.js"></script>
     <script type="text/javascript">
 
-    function formjsCurrent(data){
-        console.log(data);
-    }
-    function formjsSubmit(data){
-        //console.log(data);
-    }
-    function formjsFilesOnSubmit(data){
-        console.log(data);
-    }
-    function formjsFilesOnSelect(data){
-        console.log(data);
-    }
+    // function formjsCurrent(data){
+    //     console.log('current state');
+    //     console.log(data);
+    // }
+    // function formjsSubmit(data){
+    //     console.log('form submit');
+    //     console.log(data);
+
+    // }
+    // function formjsFilesOnSubmit(data){
+    //     console.log('files array on submit');
+    //     console.log(data);
+    // }
+    // function formjsFilesOnSelect(data){
+    //     console.log('files array on selecte');
+    //     console.log(data);
+    // }
       var values = [{
     "title": "Hello world",
     "bullets": [
@@ -58,11 +63,6 @@
                                     "type": "number",
                                     "title": "score",
                                     "enum": [1.5, 5.5, 9.5]
-                                },
-                                "score2": {
-                                    "type": "number",
-                                    "title": "score2",
-                                    "enum": [1.5, 5.5, 9.5]
                                 }
 
                             }
@@ -82,8 +82,7 @@
                     "age": {
                         "type": "integer",
                         "minimum": 0,
-                        "maximum": 150,
-                        "step": 21
+                        "maximum": 150
                     },
                     "birthday": {
                         "type": "string",
@@ -92,7 +91,6 @@
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "ux-widget": "textarea"
                     }
                 }
             }

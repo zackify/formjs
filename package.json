@@ -1,0 +1,35 @@
+{
+  "name": "formjs",
+  "preferGlobal": true,
+  "version": "0.9.0",
+  "author": "Zach Silveira <zackify@gmail.com>",
+  "description": "form generating from json schema data using Reactjs",
+  "contributors": [ 
+    {
+      "name": "Jason Kraus",
+      "email": "zbyte64@gmail.com"
+    } 
+  ],
+  "main": "./lib/http-server",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nodejitsu/http-server.git"
+  },
+  "keywords": [
+    "react",
+    "form",
+    "alpachajs"
+  ],
+  "dependencies" : {
+    "underscore" : "1.6.0",
+    "react" : "0.9.0"
+  },
+  "bundledDependencies": [
+    "union",
+    "ecstatic"
+  ],  
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.6"
+  }
+}
