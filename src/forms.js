@@ -5,6 +5,8 @@ var CreateFieldsMixin = {
   generateComponent: function(property,name,updateValues,id,childId,child,bulletId,bulletGroup){
       var fieldType = "text";
       var value = property.value;
+      var bullets = null;
+      if(this.state.values) bullets = this.state.values.bullets;
       if (property.type == "number" || property.type == "integer") fieldType = "number";
       else if (property.type == "boolean"){
         fieldType = "checkbox";
@@ -24,7 +26,7 @@ var CreateFieldsMixin = {
       return <generateField
         type         = {fieldType}
         items        = {property.enum}
-        values       = {values.bullets}
+        values       = {bullets}
         label        = {property.title} 
         name         = {name} 
         placeholder  = {property['ux-placeholder']} 
@@ -45,7 +47,7 @@ var CreateFieldsMixin = {
 
   },
   fileUpload: function(files){
-    this.props.filesOnSelect(files);
+    if(this.props.filesOnSelect) this.props.filesOnSelect(files);
     this.state.files.push(files);
   }
 };
@@ -71,18 +73,18 @@ var formjs = React.createClass({
    this.setState({childValues: childValues});
    parentValues['bullets'] = childValues;
    if(element.initial === true) return false;
-   this.props.currentState(JSON.stringify(parentValues));
+   if(this.props.currentState) this.props.currentState(JSON.stringify(parentValues));
 
    return false;
   },
   handleSubmit: function() {
     var currentValues = this.state.parentValues;
-    this.props.submitState(JSON.stringify(currentValues));
-    if(this.state.files != '') this.props.filesOnSubmit(this.state.files);
+    if(this.props.submitState) this.props.submitState(JSON.stringify(currentValues));
+    if(this.state.files != '' && this.props.filesOnSubmit) this.props.filesOnSubmit(this.state.files);
     return false;
   },
   getInitialState: function(){
-    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.iteration, parentValues: {}, childValues: {}, files: []};
+    return{ data: this.props.data, values: this.props.values, properties: this.props.data.schema.properties, iteration: this.props.iteration, parentValues: {}, childValues: {}, files: []};
 
   },
   generateChildComponent: function(fixedProps,iteration,count,id,updateValues) {
@@ -90,6 +92,7 @@ var formjs = React.createClass({
     stop = check = valueKey = childId = 0;
     var amount = count;
     var generateComponent = this.generateComponent;
+    var values = this.state.values;
     var childElements = _.map(fixedProps, function (property,name) {
       property.value = null;
       if(check == count){
@@ -98,10 +101,10 @@ var formjs = React.createClass({
         check = 0;
         valueKey++;
       }
-      if(values[iteration]){
-        if(values[iteration]['bullets'][valueKey]){
-          if(childId < amount) property.value = values[iteration]['bullets'][valueKey][property.title];
-          if(childId >= amount && childId < stop) property.value = values[iteration]['bullets'][valueKey][property.title];
+      if(values){
+        if(values['bullets'][valueKey]){
+          if(childId < amount) property.value = values['bullets'][valueKey][property.title];
+          if(childId >= amount && childId < stop) property.value = values['bullets'][valueKey][property.title];
         }
       }
       property.groupId = valueKey;
@@ -117,6 +120,7 @@ var formjs = React.createClass({
     var iteration              = this.state.iteration;
     var generateChildComponent = this.generateChildComponent;
     var generateComponent      = this.generateComponent
+    var values                 = this.state.values;
     var elements = _.map(this.state.properties, function (property,name) {
       id++;
       if(property.type == "array"){
@@ -128,9 +132,11 @@ var formjs = React.createClass({
             if(property.items.properties.hasOwnProperty(prop))
             ++count;
           }
-          for(var prop in values.bullets) {
-            if(values.bullets.hasOwnProperty(prop))
-            ++bulletCount;
+          if(values){
+            for(var prop in values.bullets) {
+              if(values.bullets.hasOwnProperty(prop))
+              ++bulletCount;
+            }
           }
           if(count >= 2){
             arrayNum = 0;
@@ -159,7 +165,7 @@ var formjs = React.createClass({
       }
       else{
           property.value = null;
-          if(values[iteration]) property.value = values[iteration][name];
+          if(values) property.value = values[name];
           return generateComponent(property,name,updateValues,id);
       }
     });
@@ -289,7 +295,6 @@ var generateField = React.createClass({
 
 var genericField = React.createClass({
   render: function(){
-    console.log(this.props.minimum);
     return(
       <div className="element inputfield">
         <p dangerouslySetInnerHTML={{__html: this.props.description}} />
@@ -298,8 +303,8 @@ var genericField = React.createClass({
         placeholder = {this.props.placeholder}
         value       = {this.props.value}
         required    = {this.props.required}
-        min         = {this.props.minimum}
-        max         = {this.props.maximum}
+        min         = {this.props.min}
+        max         = {this.props.max}
         step        = {this.props.step}
         onChange    = {this.props.change}/>
       </div>
@@ -379,18 +384,3 @@ var selectField = React.createClass({
       );
   }
 });
-
-var forms = [];
-if(!formjsSubmit) var formjsSubmit = null;
-if(!formjsFilesOnSubmit) var formjsFilesOnSubmit = null;
-if(!formjsFilesOnSelect) var formjsFilesOnSelect = null;
-if(!formjsCurrent) var formjsCurrent = null;
-if(!formjsFilesOnSelect) var formjsFilesOnSelect = null;
-
-for (var i = 0; i < schema.length; i++) {
-  forms.push(<formjs data={schema[i]} iteration={i} submitState={formjsSubmit} filesOnSubmit={formjsFilesOnSubmit} filesOnSelect={formjsFilesOnSelect} currentState={formjsCurrent} />);
-}
-React.renderComponent(
-  <div>{forms}</div>,
-  document.body
-);

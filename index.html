@@ -4,25 +4,25 @@
     <script src="react.js"></script>
     <script src="underscore-min.js"></script>
     <script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    function formjsCurrent(data){
+        console.log('current state');
+        console.log(data);
+    }
+    function formjsSubmit(data){
+        console.log('form submit');
+        console.log(data);
 
-    // function formjsCurrent(data){
-    //     console.log('current state');
-    //     console.log(data);
-    // }
-    // function formjsSubmit(data){
-    //     console.log('form submit');
-    //     console.log(data);
-
-    // }
-    // function formjsFilesOnSubmit(data){
-    //     console.log('files array on submit');
-    //     console.log(data);
-    // }
-    // function formjsFilesOnSelect(data){
-    //     console.log('files array on selecte');
-    //     console.log(data);
-    // }
-      var values = [{
+    }
+    function formjsFilesOnSubmit(data){
+        console.log('files array on submit');
+        console.log(data);
+    }
+    function formjsFilesOnSelect(data){
+        console.log('files array on selecte');
+        console.log(data);
+    }
+    var values = [{
     "title": "Hello world",
     "bullets": [
         {
@@ -208,6 +208,16 @@
             }
         }
     }];
+
+var forms = [];
+for (var i = 0; i < schema.length; i++) {
+  forms.push(formjs( {data:schema[i], values: values[i], iteration:i, submitState:formjsSubmit, filesOnSubmit:formjsFilesOnSubmit, filesOnSelect:formjsFilesOnSelect, currentState:formjsCurrent} ));
+}
+React.renderComponent(
+  React.DOM.div(null, forms),
+  document.body
+);
+});
     </script>
   </head>
   <body>
