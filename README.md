@@ -19,9 +19,11 @@ Formjs is still a work in progress but should be completed before the end of Feb
 
 **Form Elements**
 
-- Any text based field (text,password,url,etc)
+- most input fields (text,password,url,etc)
 - select boxes
-- the rest are coming shortly
+- file upload
+- radio
+- checkbox
 
 Passing Form Information
 --
