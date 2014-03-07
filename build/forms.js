@@ -8,7 +8,7 @@ var CreateFieldsMixin = {
       if (property.type == "number" || property.type == "integer") fieldType = "number";
       else if (property.type == "boolean"){
         fieldType = "checkbox";
-        if(value == '') value = false;
+        if(!value) value = false;
       }
       if (property['ux-widget']) fieldType = property['ux-widget'];
       if (property.format){
@@ -16,8 +16,8 @@ var CreateFieldsMixin = {
         if(property.format == "uri") fieldType = "file";
       }
       if(property.enum){
-        if(property.enum.length > 2) fieldType = "select";
         if(property.enum.length == 2) fieldType = "radio";
+        else fieldType = "select";
       }
       if (!property.title) property.title = name;
       if(bulletId >= 0) value = "";
@@ -82,7 +82,7 @@ var formjs = React.createClass({displayName: 'formjs',
     return false;
   },
   getInitialState: function(){
-    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.number, parentValues: {}, childValues: {}, files: []};
+    return{ data: this.props.data,properties: this.props.data.schema.properties, iteration: this.props.iteration, parentValues: {}, childValues: {}, files: []};
 
   },
   generateChildComponent: function(fixedProps,iteration,count,id,updateValues) {
@@ -91,7 +91,7 @@ var formjs = React.createClass({displayName: 'formjs',
     var amount = count;
     var generateComponent = this.generateComponent;
     var childElements = _.map(fixedProps, function (property,name) {
-      property.value = '';
+      property.value = null;
       if(check == count){
         if(childId != 3) amount += count;
         stop = amount + count;
@@ -107,14 +107,14 @@ var formjs = React.createClass({displayName: 'formjs',
       property.groupId = valueKey;
       childId++;
       check++;
-      return generateComponent(property,name,updateValues,id,childId,"true");
+      return generateComponent(property,name,updateValues,id,childId,true);
     });
     return childElements;
   },
   render: function() {
     var id = 0;
-    var updateValues = this.updateValues;
-    var iteration    = this.state.iteration;
+    var updateValues           = this.updateValues;
+    var iteration              = this.state.iteration;
     var generateChildComponent = this.generateChildComponent;
     var generateComponent      = this.generateComponent
     var elements = _.map(this.state.properties, function (property,name) {
@@ -158,7 +158,7 @@ var formjs = React.createClass({displayName: 'formjs',
         }
       }
       else{
-          property.value = "";
+          property.value = null;
           if(values[iteration]) property.value = values[iteration][name];
           return generateComponent(property,name,updateValues,id);
       }
@@ -186,7 +186,7 @@ var addField = React.createClass({displayName: 'addField',
     return {fields: this.props.fields, generatedFields: [], bulletGroup: this.props.fieldCount};
   },
   generateFields: function(fields,bulletGroup){
-    var bulletId = this.state.generatedFields.length * this.props.fieldCount;
+    var bulletId     = this.state.generatedFields.length * this.props.fieldCount;
     var updateValues = this.props.updateValues;
     var id = this.props.id;
     var generateComponent = this.generateComponent;
@@ -201,10 +201,9 @@ var addField = React.createClass({displayName: 'addField',
     this.setState({bulletGroup: this.state.bulletGroup + 1});
   },
   render: function() {
-    var fields = this.state.generatedFields;
     return (
       React.DOM.div( {className:"extraBullets"}, 
-        fields,
+        this.state.generatedFields,
         React.DOM.div( {className:"button", onClick:this.handleClick}, "Add")
       )
     );
@@ -328,7 +327,7 @@ var checkboxField = React.createClass({displayName: 'checkboxField',
 var radioField = React.createClass({displayName: 'radioField',
   render: function(){
     if(this.props.value == this.props.items[0]) var selectedFirst = "checked";
-    if(this.props.value == this.props.items[1]) var selectedSecond = "checked";
+    else var selectedSecond = "checked";
     return(
       React.DOM.div( {className:"element radio"}, 
         React.DOM.p( {dangerouslySetInnerHTML:{__html: this.props.description}} ),
@@ -382,7 +381,7 @@ var selectField = React.createClass({displayName: 'selectField',
 
 var forms = [];
 for (var i = 0; i < schema.length; i++) {
-    forms.push(formjs( {data:schema[i], number:i, submitState:formjsSubmit, filesOnSubmit:formjsFilesOnSubmit, filesOnSelect:formjsFilesOnSelect, currentState:formjsCurrent} ));
+    forms.push(formjs( {data:schema[i], iteration:i, submitState:formjsSubmit, filesOnSubmit:formjsFilesOnSubmit, filesOnSelect:formjsFilesOnSelect, currentState:formjsCurrent} ));
 }
 React.renderComponent(
   React.DOM.div(null, forms),

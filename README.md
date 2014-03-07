@@ -25,15 +25,14 @@ Formjs is still a work in progress but should be completed before the end of Feb
 
 Passing Form Information
 --
-*Update 2/13/14* you can now pass multiple forms as demonstrated in the index.html file
 
-All you need to do is create a new variable called *json*, but this can be changed. Here's an example way to pass the json schema data to formjs
+All you need to do is create a new variable called *json*, but this can be changed.
+
+Here's an example way to pass the json schema data to formjs
 ```
 <script type="text/javascript">
       var json = {
         "description": null, 
-        "title": "Site Detail",
-        "ux-submit-text" : "submit form", 
         "schema": {
             "type": "object", 
             "properties": {
@@ -41,7 +40,32 @@ All you need to do is create a new variable called *json*, but this can be chang
                     "type": "string", 
                     "description": "\n        Your Site Name will appear in the title bar of the browser. It tells\n        users and search engines what your site is about.\n    ", 
                     "title": "Site name"
-                }, 
+                },  
+                "bullets": {
+                    "items": {
+                        "type": "object", 
+                        "properties": {
+                            "text": {
+                                "type": "string", 
+                                "description": null, 
+                                "title": "text"
+                            },
+                            "score": {
+                                "type": "number",
+                                "title": "score",
+                                "enum": [1.5, 5.5, 9.5]
+                            },
+                            "score2": {
+                                "type": "number",
+                                "title": "score2",
+                                "enum": [1.5, 5.5, 9.5]
+                            }
+                        }
+                    },
+                    "type": "array", 
+                        "description": "", 
+                        "title": "Bullets"
+                    }, 
                 "domain": {
                     "type": "string", 
                     "description": "html can go here", 
@@ -68,27 +92,57 @@ All you need to do is create a new variable called *json*, but this can be chang
     </script>
 
 ```
+As you can see you can add a section called bullets. These will show as many times as there are fields. 
+If you have two bullet fields, it'll show twice. These are cool because an add button will be displayed below them. 
+The user can add as many of these as they need.
+You can also add values to fields as demonstrated below.
 
-The variables passed through json are very self explanatory. More information on the different types of things you can pass to formjs will be released when the first version is finished in the next week or so.
+```
+var values = [{
+    "title": "Hello world",
+    "bullets": [
+        {
+            "text": "hello",
+            "score": 5.5
+        },
+        {
+            "text": "world",
+            "score": 9.5
+        }
+    ],
+    "are_you_awesome": true,
+    "chromosome_configuration": "male",
+    "age": 21,
+    "birthday": "1970-01-01",
+    "email": "thedude@gmail.com"
+}];
 
+
+```
 Retrieving Form data
 --
-There's two neat callback functions that you must make in order to recieve data from formjs. You can see them both in the index.html file, but I'll put it here too:
+There's four awesome callback functions that you can make in order to recieve data from formjs. You can see them in the index.html file, but I'll put it here too:
 
 ```
-function currentState(data){
-        console.log('current state:');
+function formjsCurrent(data){
         console.log(data);
 }
-function submitState(data){
-        console.log('submit state:');
-        console.log(data);
+function formjsSubmit(data){
+    //console.log(data);
+}
+function formjsFilesOnSubmit(data){
+    console.log(data);
+}
+function formjsFilesOnSelect(data){
+    console.log(data);
 }
 
 ```
-The current state function will be called as the user changes any form fields, the submit state one will only be called once the submit button is pressed. This way, you can do whatever you want with your data. You'll recieve an array that can be passed to an ajax call using jQuery or really, whatever you want.
+The `formjsCurrent` function will be called as the user changes any form fields, and `formjsSubmit` will only be called once the submit button is pressed. This way, you can do whatever you want with your data. You'll recieve a json object that you can do whatever you want with. The last two are in case you want file uploads. In order to keep the library small, I don't handle uploads natively. With these functions you will get an array with each files object from your form.
+
 Version
 ----
+- **March 6th:** the first actually usable version is here! Most form inputs work, you can extend by adding your own form components and send a pull request if you want to help!
 - **Februrary 13th:** Multiple form support - still only text inputs
 - **Februrary 11th:** Prerelease documentaion
 
@@ -96,11 +150,36 @@ Version
 Adding Your Own Features
 --------------
 
-Extending Formjs is very simple. There's a great article on compiling ReactJS using the JSX compiler [here](http://facebook.github.io/react/docs/getting-started.html#offline-transform). Then you can simply edit src/forms.js and output your compiled changes to the build directory.
+Extending Formjs is very simple. There's a great article on compiling ReactJS using the JSX compiler [here](http://facebook.github.io/react/docs/getting-started.html#offline-transform). Then you can simply edit src/forms.js and output your compiled changes to the build directory. If you would like to create a new form element you only need to edit one section, and make a new component. In the `generateField` component add another `else if` for the new property type. Then you can reference one of the form components for an idea on what you can do. Take a look at the generic input field component:
+
+```
+
+var genericField = React.createClass({
+  render: function(){
+    return(
+      <div className="element inputfield">
+        <p dangerouslySetInnerHTML={{__html: this.props.description}} />
+        <label>{this.props.label}</label>
+        <input type = {this.props.type}
+        placeholder = {this.props.placeholder}
+        value       = {this.props.value}
+        required    = {this.props.required}
+        min         = {this.props.minimum}
+        max         = {this.props.maximum}
+        step        = {this.props.step}
+        onChange    = {this.props.change}/>
+      </div>
+    );
+  }
+});
+
+
+
+```
 
 Current To-do List
 ---
-   - Finish Formjs
+   - Add more fields
    - Remove the need for Underscore
 
 
